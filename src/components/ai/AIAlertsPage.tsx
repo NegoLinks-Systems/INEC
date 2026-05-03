@@ -35,7 +35,7 @@ function AlertCard({
   onDismiss,
   onRead,
 }: {
-  alert: MockAlert | DetectedAnomaly
+  alert: any
   onDismiss: (id: string) => void
   onRead: (id: string) => void
 }) {
