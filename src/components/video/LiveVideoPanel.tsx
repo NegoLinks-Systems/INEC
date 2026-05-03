@@ -1,6 +1,6 @@
 // src/components/video/LiveVideoPanel.tsx
 // ─────────────────────────────────────────────────────────────────────────────
-// MINI-INEC 2.0 — On-Demand Live Video (Module 4)
+// INEC 2.0 — On-Demand Live Video (Module 4)
 // Agora RTC integration via Firestore signaling
 // Admin clicks "Request Stream" → Firestore triggers officer's device
 // ─────────────────────────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 // src/components/legacy/LegacyPortals.tsx
 // ─────────────────────────────────────────────────────────────────────────────
-// MINI-INEC 2.0 — Legacy System Harmonization (Module 6)
+// INEC 2.0 — Legacy System Harmonization (Module 6)
 // Embeds existing INEC platforms via iframe or API wrapper
 // Creates a unified workspace from multiple legacy portals
 // ─────────────────────────────────────────────────────────────────────────────

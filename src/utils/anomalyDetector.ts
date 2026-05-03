@@ -1,6 +1,6 @@
 // src/utils/anomalyDetector.ts
 // ─────────────────────────────────────────────────────────────────────────────
-// MINI-INEC 2.0 — AI Anomaly Detection Engine (Module 7)
+// INEC 2.0 — AI Anomaly Detection Engine (Module 7)
 // Monitors fleet locations, PU submissions, and operational timelines
 // Triggers alerts to the admin dashboard
 // ─────────────────────────────────────────────────────────────────────────────

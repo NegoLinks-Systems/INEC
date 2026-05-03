@@ -1,6 +1,6 @@
 // src/firebase/schema.ts
 // ─────────────────────────────────────────────────────────────────────────────
-// MINI-INEC 2.0 — Complete Firestore Database Schema
+// INEC 2.0 — Complete Firestore Database Schema
 //
 // COLLECTION HIERARCHY:
 //

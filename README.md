@@ -1,4 +1,4 @@
-# MINI-INEC 2.0 — National Electoral Operations & Logistics Monitoring System
+# INEC 2.0 — National Electoral Operations & Logistics Monitoring System
 
 **Developed by NegoLinks Systems Ltd for INEC HQ, Abuja**
 
@@ -7,7 +7,7 @@
 ## System Architecture
 
 ```
-mini-inec/
+inec/
 ├── src/                          # Next.js Web Dashboard (Admin)
 │   ├── app/                      # App Router pages
 │   │   ├── inec/                 # Main dashboard routes (basePath: /inec)
@@ -69,7 +69,7 @@ mini-inec/
 ### 1. Install dependencies
 
 ```bash
-cd mini-inec
+cd inec
 npm install
 ```
 

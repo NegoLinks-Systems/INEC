@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import '@/styles/globals.css'
 
 export const metadata: Metadata = {
-  title: 'MINI-INEC 2.0 — Electoral Operations Command',
+  title: 'INEC 2.0 — Electoral Operations Command',
   description: 'National Electoral Operations & Logistics Monitoring System — NegoLinks Systems Ltd',
   icons: { icon: '/favicon.ico' },
 }

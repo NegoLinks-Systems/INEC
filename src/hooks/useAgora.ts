@@ -1,6 +1,6 @@
 // src/hooks/useAgora.ts
 // ─────────────────────────────────────────────────────────────────────────────
-// Agora RTC integration hook for MINI-INEC 2.0
+// Agora RTC integration hook for INEC 2.0
 // Manages live video sessions between Admin and Field Officers
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -13,8 +13,10 @@ interface AgoraRTCClient {
   publish: (tracks: AgoraTrack[]) => Promise<void>
   unpublish: (tracks?: AgoraTrack[]) => Promise<void>
   subscribe: (user: AgoraRemoteUser, mediaType: 'video' | 'audio') => Promise<void>
-  on: (event: string, callback: (...args: unknown[]) => void) => void
-  off: (event: string, callback: (...args: unknown[]) => void) => void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  on: (event: string, callback: (...args: any[]) => void) => void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  off: (event: string, callback: (...args: any[]) => void) => void
   remoteUsers: AgoraRemoteUser[]
 }
 
@@ -53,7 +55,7 @@ export interface UseAgoraReturn {
   playRemoteVideo: (uid: number, elementId: string) => void
 }
 
-const AGORA_APP_ID = process.env.NEXT_PUBLIC_AGORA_APP_ID || 'YOUR_AGORA_APP_ID'
+const AGORA_APP_ID = process.env.NEXT_PUBLIC_AGORA_APP_ID || 'c12ef624608244059d1a19c8b1229423'
 
 export function useAgora(): UseAgoraReturn {
   const [isConnected, setIsConnected] = useState(false)

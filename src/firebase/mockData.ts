@@ -1,6 +1,6 @@
 // src/firebase/mockData.ts
 // ─────────────────────────────────────────────────────────────────────────────
-// Demo seed data for MINI-INEC 2.0 PoC
+// Demo seed data for INEC 2.0 PoC
 // Simulates a realistic subset of Nigeria's electoral geography
 // ─────────────────────────────────────────────────────────────────────────────
 

@@ -1,6 +1,7 @@
 // src/components/warroom/WarRoom.tsx
+
 // ─────────────────────────────────────────────────────────────────────────────
-// MINI-INEC 2.0 — War Room Command Center (Module 8)
+// INEC 2.0 — War Room Command Center (Module 8)
 // Dedicated 1080p/4K large-screen display
 // 4 quadrants: Data | Live Map | Media | AI Alerts
 // ─────────────────────────────────────────────────────────────────────────────
@@ -9,6 +10,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
+import type { LucideProps } from 'lucide-react'
 import {
   Shield, Activity, WifiOff, CheckCircle, Truck,
   Video, AlertTriangle, BrainCircuit, Users, ExternalLink
@@ -34,7 +36,7 @@ function LiveCounter({
   label: string
   value: number
   color: string
-  icon: React.FC<{ size?: number; color?: string }>
+  icon: React.ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>>
   animate?: boolean
 }) {
   const [displayed, setDisplayed] = useState(0)
@@ -643,21 +645,30 @@ export default function WarRoom() {
         flexShrink: 0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/* INEC Logo */}
           <div style={{
-            width: 30,
-            height: 30,
-            background: 'var(--green-inec)',
-            borderRadius: 7,
+            width: 44,
+            height: 44,
+            background: '#000',
+            borderRadius: 8,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            border: '1px solid var(--green-dim)',
             boxShadow: 'var(--glow-green)',
+            overflow: 'hidden',
+            flexShrink: 0,
           }}>
-            <Shield size={16} color="#fff" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/inec/inec-logo.png"
+              alt="INEC Logo"
+              style={{ width: 40, height: 40, objectFit: 'contain' }}
+            />
           </div>
           <div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 800, letterSpacing: '-0.01em' }}>
-              MINI-INEC 2.0 — WAR ROOM
+              INEC 2.0 — WAR ROOM
             </div>
             <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--green-inec)', letterSpacing: '0.1em' }}>
               NATIONAL COMMAND CENTER · REAL-TIME OPERATIONS

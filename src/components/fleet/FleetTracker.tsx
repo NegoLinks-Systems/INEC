@@ -1,6 +1,6 @@
 // src/components/fleet/FleetTracker.tsx
 // ─────────────────────────────────────────────────────────────────────────────
-// MINI-INEC 2.0 — Fleet Tracker (Module 3)
+// INEC 2.0 — Fleet Tracker (Module 3)
 // Real-time GPS/RFID tracking of dispatch vehicles
 // Simulates continuous Firestore fleet_locations updates
 // ─────────────────────────────────────────────────────────────────────────────

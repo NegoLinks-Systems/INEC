@@ -1,6 +1,6 @@
 // src/components/dashboard/DashboardLayout.tsx
 // ─────────────────────────────────────────────────────────────────────────────
-// MINI-INEC 2.0 — Main Admin Dashboard Layout
+// INEC 2.0 — Main Admin Dashboard Layout
 // Implements cascading State → LGA → Ward → PU filter hierarchy
 // Uses Context API + useReducer for state management
 // ─────────────────────────────────────────────────────────────────────────────
@@ -165,31 +165,43 @@ function Sidebar({ isOpen }: { isOpen: boolean }) {
     >
       {/* Logo */}
       <div style={{
-        padding: '20px 24px',
+        padding: '16px 20px',
         borderBottom: '1px solid var(--bg-border)',
         display: 'flex',
         alignItems: 'center',
         gap: '12px',
+        background: '#000',
       }}>
+        {/* INEC Logo */}
         <div style={{
-          width: 36,
-          height: 36,
-          borderRadius: 8,
-          background: 'var(--green-inec)',
+          width: 48,
+          height: 48,
+          borderRadius: 10,
+          background: '#000',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: 'var(--glow-green)',
           flexShrink: 0,
+          overflow: 'hidden',
+          border: '1px solid var(--green-dim)',
+          boxShadow: 'var(--glow-green)',
         }}>
-          <Shield size={18} color="#fff" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/inec/inec-logo.png"
+            alt="INEC Logo"
+            style={{ width: 44, height: 44, objectFit: 'contain' }}
+          />
         </div>
         <div>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 15, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
-            MINI-INEC
+          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 14, letterSpacing: '-0.01em', color: 'var(--text-primary)', lineHeight: 1.2 }}>
+            INEC 2.0
           </div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--green-inec)', letterSpacing: '0.1em' }}>
-            2.0 COMMAND
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--green-inec)', letterSpacing: '0.1em', marginTop: 2 }}>
+            COMMAND DASHBOARD
+          </div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)', letterSpacing: '0.05em', marginTop: 1 }}>
+            NegoLinks Systems Ltd
           </div>
         </div>
       </div>
@@ -263,7 +275,7 @@ function Sidebar({ isOpen }: { isOpen: boolean }) {
           <Users size={14} color="var(--green-inec)" />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', truncate: 'ellipsis' }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             Super Admin
           </div>
           <div style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
@@ -472,6 +484,27 @@ function TopBar({
             {alertCount > 9 ? '9+' : alertCount}
           </span>
         )}
+      </div>
+
+      {/* INEC Logo in topbar */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        borderLeft: '1px solid var(--bg-border)',
+        paddingLeft: 12,
+        marginLeft: 4,
+      }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/inec/inec-logo.png"
+          alt="INEC"
+          style={{ width: 32, height: 32, objectFit: 'contain', background: '#000', borderRadius: 6, padding: 2 }}
+        />
+        <div style={{ lineHeight: 1.2 }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.08em' }}>INEC</div>
+          <div style={{ fontSize: 8, color: 'var(--text-muted)', letterSpacing: '0.05em' }}>NIGERIA</div>
+        </div>
       </div>
 
       <button className="btn btn-ghost btn-sm" style={{ padding: '6px' }}>

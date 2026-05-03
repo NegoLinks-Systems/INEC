@@ -1,6 +1,6 @@
 // src/components/incidents/IncidentsPanel.tsx
 // ─────────────────────────────────────────────────────────────────────────────
-// MINI-INEC 2.0 — Incident Reporting & Evidence Uploads (Module 5)
+// INEC 2.0 — Incident Reporting & Evidence Uploads (Module 5)
 // Field officers report via mobile app → Firebase Storage + Firestore
 // Admin sees real-time feed with severity alerts
 // ─────────────────────────────────────────────────────────────────────────────
@@ -399,7 +399,7 @@ export default function IncidentsPanel() {
         gap: 8,
       }}>
         <FileText size={14} />
-        Field officers submit incidents via the MINI-INEC mobile app. Photos upload to Firebase Cloud Storage.
+        Field officers submit incidents via the INEC mobile app. Photos upload to Firebase Cloud Storage.
         GPS coordinates, timestamps, and evidence URLs are automatically stored in Firestore and alert the admin dashboard in real-time.
       </div>
 

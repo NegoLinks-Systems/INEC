@@ -1,6 +1,6 @@
 // src/components/map/LiveMap.tsx
 // ─────────────────────────────────────────────────────────────────────────────
-// MINI-INEC 2.0 — Interactive Live Map (Module 1 + Module 3)
+// INEC 2.0 — Interactive Live Map (Module 1 + Module 3)
 // React Leaflet with marker clustering for 176k+ PUs + fleet vehicles
 // Dynamically reveals individual markers as admin zooms in
 // ─────────────────────────────────────────────────────────────────────────────
@@ -176,7 +176,7 @@ function VehiclePopup({ vehicle }: { vehicle: MockVehicle }) {
 export default function LiveMap() {
   const { filters } = useFilters()
   const allPUs = getAllMockPUs()
-  const [activeLayers, setActiveLayers] = useState<Set<LayerType>>(new Set(['PUs', 'Vehicles']))
+  const [activeLayers, setActiveLayers] = useState<Set<LayerType>>(new Set<LayerType>(['PUs', 'Vehicles'] as LayerType[]))
   const [selectedPU, setSelectedPU] = useState<MockPU | null>(null)
 
   const visiblePUs = useMemo(() => {
