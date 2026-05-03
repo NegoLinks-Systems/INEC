@@ -1,3 +1,2 @@
-// src/app/inec/page.tsx
-import OverviewPage from '@/components/dashboard/OverviewPage'
-export default function Page() { return <OverviewPage /> }
+export const dynamic = 'force-dynamic'
+export { default } from '@/components/dashboard/OverviewPage'

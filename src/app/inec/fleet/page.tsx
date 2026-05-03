@@ -1,3 +1,2 @@
-// src/app/inec/fleet/page.tsx
-import FleetTracker from '@/components/fleet/FleetTracker'
-export default function Page() { return <FleetTracker /> }
+export const dynamic = "force-dynamic"
+export { default } from "@/components/fleet/FleetTracker"

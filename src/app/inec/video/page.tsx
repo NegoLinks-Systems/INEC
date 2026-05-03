@@ -1,3 +1,2 @@
-// src/app/inec/video/page.tsx
-import LiveVideoPanel from '@/components/video/LiveVideoPanel'
-export default function Page() { return <LiveVideoPanel /> }
+export const dynamic = "force-dynamic"
+export { default } from "@/components/video/LiveVideoPanel"

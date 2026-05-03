@@ -1,3 +1,2 @@
-// src/app/inec/map/page.tsx
-import LiveMap from '@/components/map/LiveMap'
-export default function Page() { return <LiveMap /> }
+export const dynamic = "force-dynamic"
+export { default } from "@/components/map/LiveMap"

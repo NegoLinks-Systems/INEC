@@ -1,3 +1,2 @@
-// src/app/inec/incidents/page.tsx
-import IncidentsPanel from '@/components/incidents/IncidentsPanel'
-export default function Page() { return <IncidentsPanel /> }
+export const dynamic = "force-dynamic"
+export { default } from "@/components/incidents/IncidentsPanel"
