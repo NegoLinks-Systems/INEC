@@ -39,7 +39,7 @@ function AlertCard({
   onDismiss: (id: string) => void
   onRead: (id: string) => void
 }) {
-  const id = 'alertId' in alert ? alert.alertId : alert.alertId
+  const id = (alert as any).alertId || (alert as any).id || "fallback-id";
   const title = alert.title
   const message = alert.message
   const severity: IncidentSeverity = alert.severity
