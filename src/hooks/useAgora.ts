@@ -1,17 +1,12 @@
 // src/hooks/useAgora.ts
-// ─────────────────────────────────────────────────────────────────────────────
-// Agora RTC integration hook for INEC 2.0
-// Manages live video sessions between Admin and Field Officers
-// ─────────────────────────────────────────────────────────────────────────────
+'use client'
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 
-// Agora types
 interface AgoraRTCClient {
   join: (appId: string, channel: string, token: string | null, uid: number | null) => Promise<number>
   leave: () => Promise<void>
   publish: (tracks: AgoraTrack[]) => Promise<void>
-  unpublish: (tracks?: AgoraTrack[]) => Promise<void>
   subscribe: (user: AgoraRemoteUser, mediaType: 'video' | 'audio') => Promise<void>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on: (event: string, callback: (...args: any[]) => void) => void
@@ -55,7 +50,20 @@ export interface UseAgoraReturn {
   playRemoteVideo: (uid: number, elementId: string) => void
 }
 
-const AGORA_APP_ID = process.env.NEXT_PUBLIC_AGORA_APP_ID ?? 'c12ef624608244059d1a19c8b1229423'
+const APP_ID = process.env.NEXT_PUBLIC_AGORA_APP_ID ?? 'c12ef624608244059d1a19c8b1229423'
+
+// Fetch token from our Vercel serverless function
+async function fetchAgoraToken(channelName: string, uid: number): Promise<string | null> {
+  try {
+    const res = await fetch(`/api/agora-token?channel=${encodeURIComponent(channelName)}&uid=${uid}&role=publisher`)
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.token ?? null
+  } catch {
+    console.warn('Could not fetch Agora token, using null (test mode)')
+    return null
+  }
+}
 
 export function useAgora(): UseAgoraReturn {
   const [isConnected, setIsConnected] = useState(false)
@@ -70,7 +78,6 @@ export function useAgora(): UseAgoraReturn {
   const localVideoTrackRef = useRef<AgoraTrack | null>(null)
   const localAudioTrackRef = useRef<AgoraTrack | null>(null)
 
-  // Dynamically import Agora SDK (client-side only)
   const getAgoraRTC = useCallback(async () => {
     if (typeof window === 'undefined') return null
     const AgoraRTC = (await import('agora-rtc-sdk-ng')).default
@@ -85,29 +92,33 @@ export function useAgora(): UseAgoraReturn {
       const AgoraRTC = await getAgoraRTC()
       if (!AgoraRTC) throw new Error('Agora SDK not available')
 
-      // Create client
       const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' }) as unknown as AgoraRTCClient
       clientRef.current = client
 
-      // Listen for remote users
       client.on('user-published', async (user: AgoraRemoteUser, mediaType: 'video' | 'audio') => {
         await client.subscribe(user, mediaType)
-        setRemoteUsers((prev) => {
-          const exists = prev.find((u) => u.uid === user.uid)
-          return exists ? prev.map((u) => (u.uid === user.uid ? user : u)) : [...prev, user]
+        setRemoteUsers(prev => {
+          const exists = prev.find(u => u.uid === user.uid)
+          return exists ? prev.map(u => u.uid === user.uid ? user : u) : [...prev, user]
         })
       })
 
       client.on('user-unpublished', (user: AgoraRemoteUser) => {
-        setRemoteUsers((prev) => prev.filter((u) => u.uid !== user.uid))
+        setRemoteUsers(prev => prev.filter(u => u.uid !== user.uid))
       })
 
       client.on('user-left', (user: AgoraRemoteUser) => {
-        setRemoteUsers((prev) => prev.filter((u) => u.uid !== user.uid))
+        setRemoteUsers(prev => prev.filter(u => u.uid !== user.uid))
       })
 
-      // Join channel (token = null for testing; use token server in production)
-      await client.join(AGORA_APP_ID, session.channelId, null, null)
+      // Generate a unique UID for this session
+      const uid = Math.floor(Math.random() * 100000)
+
+      // Fetch token from our serverless function
+      const token = await fetchAgoraToken(session.channelId, uid)
+
+      // Join the channel
+      await client.join(APP_ID, session.channelId, token, uid)
 
       // Create local tracks
       const [audioTrack, videoTrack] = await (AgoraRTC as {
@@ -117,35 +128,28 @@ export function useAgora(): UseAgoraReturn {
       localAudioTrackRef.current = audioTrack
       localVideoTrackRef.current = videoTrack
 
-      // Publish local tracks
       await client.publish([audioTrack, videoTrack])
 
       setIsConnected(true)
       setLocalVideoReady(true)
       setIsConnecting(false)
+
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to start Agora session'
+      const message = err instanceof Error ? err.message : 'Failed to start video session'
       setError(message)
       setIsConnecting(false)
-      console.error('Agora session error:', err)
     }
   }, [getAgoraRTC])
 
   const endSession = useCallback(async () => {
     try {
-      if (localVideoTrackRef.current) {
-        localVideoTrackRef.current.stop()
-        localVideoTrackRef.current.close()
-      }
-      if (localAudioTrackRef.current) {
-        localAudioTrackRef.current.stop()
-        localAudioTrackRef.current.close()
-      }
-      if (clientRef.current) {
-        await clientRef.current.leave()
-      }
+      localVideoTrackRef.current?.stop()
+      localVideoTrackRef.current?.close()
+      localAudioTrackRef.current?.stop()
+      localAudioTrackRef.current?.close()
+      await clientRef.current?.leave()
     } catch (err) {
-      console.error('Error ending Agora session:', err)
+      console.error('Error ending session:', err)
     } finally {
       setIsConnected(false)
       setLocalVideoReady(false)
@@ -158,46 +162,33 @@ export function useAgora(): UseAgoraReturn {
 
   const toggleVideo = useCallback(() => {
     if (localVideoTrackRef.current) {
-      const newMuted = !isVideoMuted
-      localVideoTrackRef.current.setEnabled(!newMuted)
-      setIsVideoMuted(newMuted)
+      localVideoTrackRef.current.setEnabled(isVideoMuted)
+      setIsVideoMuted(v => !v)
     }
   }, [isVideoMuted])
 
   const toggleAudio = useCallback(() => {
     if (localAudioTrackRef.current) {
-      const newMuted = !isAudioMuted
-      localAudioTrackRef.current.setEnabled(!newMuted)
-      setIsAudioMuted(newMuted)
+      localAudioTrackRef.current.setEnabled(isAudioMuted)
+      setIsAudioMuted(a => !a)
     }
   }, [isAudioMuted])
 
   const playRemoteVideo = useCallback((uid: number, elementId: string) => {
-    const user = remoteUsers.find((u) => u.uid === uid)
-    if (user?.videoTrack) {
-      user.videoTrack.play(elementId)
-    }
+    const user = remoteUsers.find(u => u.uid === uid)
+    if (user?.videoTrack) user.videoTrack.play(elementId)
   }, [remoteUsers])
 
-  // Cleanup on unmount
   useEffect(() => {
-    return () => {
-      endSession()
-    }
+    return () => { endSession() }
   }, [endSession])
 
   return {
-    isConnected,
-    isConnecting,
-    localVideoReady,
-    remoteUsers,
-    error,
-    startSession,
-    endSession,
-    toggleVideo,
-    toggleAudio,
-    isVideoMuted,
-    isAudioMuted,
+    isConnected, isConnecting, localVideoReady,
+    remoteUsers, error,
+    startSession, endSession,
+    toggleVideo, toggleAudio,
+    isVideoMuted, isAudioMuted,
     playRemoteVideo,
   }
 }
