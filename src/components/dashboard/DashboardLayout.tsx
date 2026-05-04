@@ -15,7 +15,8 @@ import {
   Globe, BrainCircuit, Shield, ChevronDown, Bell,
   Settings, LogOut, Menu, X, Activity, Users
 } from 'lucide-react'
-import { MOCK_STATES, NATIONAL_STATS, MockState, MockLGA, MockWard } from '@/firebase/mockData'
+import { MOCK_STATES, MockState, MockLGA, MockWard } from '@/firebase/mockData'
+import { useLiveStates, useLiveLGAs, useLiveWards, LiveState, LiveLGA, LiveWard } from '@/hooks/firebase/useFirestore'
 
 // ─── Filter State & Reducer ───────────────────────────────────────────────────
 export interface FilterState {
@@ -293,6 +294,14 @@ function Sidebar({ isOpen }: { isOpen: boolean }) {
 // ─── Cascading Filter Bar ─────────────────────────────────────────────────────
 function FilterBar() {
   const { filters, dispatch } = useFilters()
+  const { states: liveStates } = useLiveStates()
+  const { lgas: liveLGAs } = useLiveLGAs(filters.selectedStateId)
+  const { wards: liveWards } = useLiveWards(filters.selectedStateId, filters.selectedLgaId)
+
+  // Use live Firebase states if available, fallback to mock
+  const stateList = liveStates.length > 0 ? liveStates : MOCK_STATES
+  const lgaList = liveLGAs.length > 0 ? liveLGAs : filters.availableLGAs
+  const wardList = liveWards.length > 0 ? liveWards : filters.availableWards
 
   return (
     <div style={{
@@ -301,17 +310,18 @@ function FilterBar() {
       gap: 8,
       padding: '0 20px',
       flex: 1,
+      overflowX: 'auto',
     }}>
       {/* State */}
-      <div style={{ position: 'relative' }}>
+      <div style={{ position: 'relative', flexShrink: 0 }}>
         <select
           className="select"
-          style={{ width: 160, paddingRight: 28 }}
+          style={{ width: 170, paddingRight: 28 }}
           value={filters.selectedStateId || ''}
           onChange={(e) => dispatch({ type: 'SELECT_STATE', stateId: e.target.value || null })}
         >
           <option value="">All States (36+FCT)</option>
-          {MOCK_STATES.map((s) => (
+          {stateList.map((s) => (
             <option key={s.stateId} value={s.stateId}>{s.name}</option>
           ))}
         </select>
@@ -325,7 +335,7 @@ function FilterBar() {
 
       {/* LGA */}
       {filters.selectedStateId && (
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', flexShrink: 0 }}>
           <select
             className="select"
             style={{ width: 180 }}
@@ -333,7 +343,7 @@ function FilterBar() {
             onChange={(e) => dispatch({ type: 'SELECT_LGA', lgaId: e.target.value || null })}
           >
             <option value="">All LGAs</option>
-            {filters.availableLGAs.map((l) => (
+            {lgaList.map((l) => (
               <option key={l.lgaId} value={l.lgaId}>{l.name}</option>
             ))}
           </select>
@@ -348,7 +358,7 @@ function FilterBar() {
 
       {/* Ward */}
       {filters.selectedLgaId && (
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', flexShrink: 0 }}>
           <select
             className="select"
             style={{ width: 160 }}
@@ -356,7 +366,7 @@ function FilterBar() {
             onChange={(e) => dispatch({ type: 'SELECT_WARD', wardId: e.target.value || null })}
           >
             <option value="">All Wards</option>
-            {filters.availableWards.map((w) => (
+            {wardList.map((w) => (
               <option key={w.wardId} value={w.wardId}>{w.name}</option>
             ))}
           </select>

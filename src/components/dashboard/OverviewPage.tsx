@@ -9,6 +9,7 @@ import {
   AlertTriangle, Truck, BarChart3, RefreshCw, Flag
 } from 'lucide-react'
 import { MOCK_STATES, NATIONAL_STATS, getAllMockPUs, MockPU } from '@/firebase/mockData'
+import { useLiveNationalStats, useLiveStates } from '@/hooks/firebase/useFirestore'
 import { PUStatus } from '@/firebase/schema'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import type { ForwardRefExoticComponent, RefAttributes } from 'react'
@@ -164,6 +165,8 @@ export default function OverviewPage() {
   const { filters, selectedState, selectedLGA } = useFilters()
   const [lastRefresh, setLastRefresh] = useState(new Date())
   const allPUs = getAllMockPUs()
+  const liveStats = useLiveNationalStats()
+  const { states: liveStates } = useLiveStates()
 
   const visiblePUs = useMemo(() => {
     return allPUs.filter((pu) => {
@@ -175,8 +178,23 @@ export default function OverviewPage() {
     })
   }, [allPUs, filters])
 
-  const stats = selectedState ? selectedState.stats : NATIONAL_STATS
+  // Use live Firebase stats if available, fallback to mock
+  const nationalStats = liveStats.isLoading ? NATIONAL_STATS : {
+    ...NATIONAL_STATS,
+    activePUs:         liveStats.activePUs || NATIONAL_STATS.activePUs,
+    offlinePUs:        liveStats.offlinePUs || NATIONAL_STATS.offlinePUs,
+    completedPUs:      liveStats.completedPUs || NATIONAL_STATS.completedPUs,
+    flaggedPUs:        liveStats.flaggedPUs || NATIONAL_STATS.flaggedPUs,
+    totalVotesCast:    liveStats.totalVotesCast || NATIONAL_STATS.totalVotesCast,
+    vehiclesInTransit: liveStats.vehiclesInTransit || NATIONAL_STATS.vehiclesInTransit,
+    totalVehicles:     liveStats.totalVehicles || NATIONAL_STATS.totalVehicles,
+  }
+
+  // Use live states for state breakdown if available
+  const stateBreakdown = liveStates.length > 0 ? liveStates : MOCK_STATES
+  const stats = selectedState ? selectedState.stats : nationalStats
   const isNational = !selectedState
+  void stateBreakdown // used in JSX below
 
   return (
     <div style={{ height: '100%', overflowY: 'auto', padding: 20 }}>

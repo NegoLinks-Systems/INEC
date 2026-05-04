@@ -10,17 +10,20 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { Truck, MapPin, AlertTriangle, CheckCircle, Clock, Navigation, Package, Wifi } from 'lucide-react'
 import { MOCK_VEHICLES, MockVehicle } from '@/firebase/mockData'
+import { useLiveFleet } from '@/hooks/firebase/useFirestore'
 
-// ─── Simulate live vehicle movement ──────────────────────────────────────────
-function useSimulatedFleet() {
-  const [vehicles, setVehicles] = useState<MockVehicle[]>(MOCK_VEHICLES)
+// ─── Fleet data — Firebase real-time with simulation fallback ────────────────
+function useFleetData() {
+  const { vehicles: fbVehicles, isLoading } = useLiveFleet()
+  const [simVehicles, setSimVehicles] = useState<MockVehicle[]>(MOCK_VEHICLES)
 
+  // Simulate movement for mock vehicles when Firebase is empty
   useEffect(() => {
+    if (!isLoading && fbVehicles.length > 0) return // Firebase has real data
     const interval = setInterval(() => {
-      setVehicles((prev) =>
-        prev.map((v) => {
+      setSimVehicles(prev =>
+        prev.map(v => {
           if (v.status === 'in_transit' || v.status === 'dispatched') {
-            // Randomly nudge coordinates to simulate movement
             const delta = 0.0008
             return {
               ...v,
@@ -36,12 +39,12 @@ function useSimulatedFleet() {
           return v
         })
       )
-    }, 3000) // Update every 3 seconds (Firestore would push in real deployment)
-
+    }, 3000)
     return () => clearInterval(interval)
-  }, [])
+  }, [isLoading, fbVehicles.length])
 
-  return vehicles
+  // Return Firebase data if available, otherwise simulated
+  return fbVehicles.length > 0 ? fbVehicles as unknown as MockVehicle[] : simVehicles
 }
 
 // ─── Status Helpers ───────────────────────────────────────────────────────────
@@ -244,7 +247,7 @@ function FleetSummary({ vehicles }: { vehicles: MockVehicle[] }) {
 
 // ─── Fleet Tracker Page ───────────────────────────────────────────────────────
 export default function FleetTracker() {
-  const vehicles = useSimulatedFleet()
+  const vehicles = useFleetData()
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   return (

@@ -7,6 +7,7 @@ import {
   BarChart2, RefreshCw, CheckCircle, X, Eye
 } from 'lucide-react'
 import { MOCK_ALERTS } from '@/firebase/mockData'
+import { useLiveAlerts } from '@/hooks/firebase/useFirestore'
 import { runAnomalyDetection, formatAlertTime, getSeverityColor } from '@/utils/anomalyDetector'
 import { IncidentSeverity } from '@/firebase/schema'
 
@@ -150,15 +151,28 @@ export default function AIAlertsPage() {
   const [isRunning, setIsRunning] = useState(false)
   const [lastRun, setLastRun] = useState<Date | null>(null)
 
+  const { alerts: firebaseAlerts, markRead: fbMarkRead, dismiss: fbDismiss } = useLiveAlerts()
+
   const runDetection = () => {
     setIsRunning(true)
     setTimeout(() => {
       const detected = runAnomalyDetection()
+      // Merge Firebase alerts + local anomaly detection
+      const fbUnified = firebaseAlerts.map(toUnified)
+      const mockFallback = fbUnified.length === 0 ? MOCK_ALERTS.map(toUnified) : []
       const combined: UnifiedAlert[] = [
-        ...MOCK_ALERTS.map(toUnified),
+        ...fbUnified,
+        ...mockFallback,
         ...detected.map(toUnified),
       ]
-      setAlerts(combined)
+      // Deduplicate by alertId
+      const seen = new Set<string>()
+      const unique = combined.filter(a => {
+        if (seen.has(a.alertId)) return false
+        seen.add(a.alertId)
+        return true
+      })
+      setAlerts(unique)
       setLastRun(new Date())
       setIsRunning(false)
     }, 800)
@@ -171,9 +185,14 @@ export default function AIAlertsPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const handleDismiss = (id: string) => setDismissed((prev) => [...prev, id])
-  const handleRead = (id: string) =>
+  const handleDismiss = (id: string) => {
+    setDismissed((prev) => [...prev, id])
+    fbDismiss(id).catch(() => {})
+  }
+  const handleRead = (id: string) => {
     setAlerts((prev) => prev.map((a) => a.alertId === id ? { ...a, isRead: true } : a))
+    fbMarkRead(id).catch(() => {})
+  }
   const handleMarkAllRead = () =>
     setAlerts((prev) => prev.map((a) => ({ ...a, isRead: true })))
 

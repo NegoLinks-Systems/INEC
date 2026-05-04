@@ -13,6 +13,7 @@ import {
   Image, FileText, Filter, ChevronDown, MessageSquare
 } from 'lucide-react'
 import { MOCK_INCIDENTS, MockIncident } from '@/firebase/mockData'
+import { useLiveIncidents } from '@/hooks/firebase/useFirestore'
 import { IncidentSeverity } from '@/firebase/schema'
 import { formatAlertTime } from '@/utils/anomalyDetector'
 
@@ -246,7 +247,15 @@ function IncidentRow({
 
 // ─── Incidents Page ───────────────────────────────────────────────────────────
 export default function IncidentsPanel() {
+  const { incidents: firebaseIncidents } = useLiveIncidents(100)
   const [incidents, setIncidents] = useState<MockIncident[]>(MOCK_INCIDENTS)
+
+  // Sync Firebase incidents to local state
+  React.useEffect(() => {
+    if (firebaseIncidents.length > 0) {
+      setIncidents(firebaseIncidents as unknown as MockIncident[])
+    }
+  }, [firebaseIncidents])
   const [selectedIncident, setSelectedIncident] = useState<MockIncident | null>(null)
   const [severityFilter, setSeverityFilter] = useState<IncidentSeverity | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<'open' | 'acknowledged' | 'resolved' | 'all'>('all')
