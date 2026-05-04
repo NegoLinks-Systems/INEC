@@ -391,7 +391,7 @@ select.select option {
 }
 
 .leaflet-tile {
-  filter: brightness(0.7) saturate(0.3) hue-rotate(180deg) invert(0.85);
+  filter: none;
 }
 
 .leaflet-popup-content-wrapper {

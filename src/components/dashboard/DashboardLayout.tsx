@@ -544,6 +544,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           gridColumn: 2,
           overflow: 'hidden',
           background: 'var(--bg-base)',
+          position: 'relative',
         }}>
           {children}
         </main>

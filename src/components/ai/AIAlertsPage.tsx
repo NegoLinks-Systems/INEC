@@ -187,7 +187,7 @@ export default function AIAlertsPage() {
   const alertTypes = Array.from(new Set(alerts.map((a) => a.alertType)))
 
   return (
-    <div style={{ minHeight: '100%', overflowY: 'auto', padding: 20, paddingBottom: 40 }}>
+    <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: 20, paddingBottom: 60 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(0,166,81,0.1)', border: '1px solid rgba(0,166,81,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
