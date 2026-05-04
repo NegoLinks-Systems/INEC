@@ -55,7 +55,7 @@ export interface UseAgoraReturn {
   playRemoteVideo: (uid: number, elementId: string) => void
 }
 
-const AGORA_APP_ID = process.env.NEXT_PUBLIC_AGORA_APP_ID || 'c12ef624608244059d1a19c8b1229423'
+const AGORA_APP_ID = process.env.NEXT_PUBLIC_AGORA_APP_ID ?? 'c12ef624608244059d1a19c8b1229423'
 
 export function useAgora(): UseAgoraReturn {
   const [isConnected, setIsConnected] = useState(false)

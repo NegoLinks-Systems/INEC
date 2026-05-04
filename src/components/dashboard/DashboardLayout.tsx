@@ -210,7 +210,7 @@ function Sidebar({ isOpen }: { isOpen: boolean }) {
       <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon
-          const isActive = pathname === item.href
+          const isActive = pathname === item.href || pathname === item.href + '/' || (item.href !== '/dashboard' && pathname.startsWith(item.href))
           return (
             <Link
               key={item.href}

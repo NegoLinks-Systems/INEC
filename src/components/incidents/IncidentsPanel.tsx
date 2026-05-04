@@ -273,7 +273,7 @@ export default function IncidentsPanel() {
   }
 
   return (
-    <div style={{ height: '100%', overflowY: 'auto', padding: 20 }}>
+    <div style={{ height: '100%', overflowY: 'auto', padding: 20, boxSizing: 'border-box' as const }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
         <div>

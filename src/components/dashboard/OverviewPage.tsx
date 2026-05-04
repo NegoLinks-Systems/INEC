@@ -30,7 +30,9 @@ function StatCard({
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: color, opacity: 0.6 }} />
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
-          <div className="stat-value">{typeof value === 'number' ? value.toLocaleString() : value}</div>
+          <div className="stat-value" style={{ fontSize: typeof value === 'number' && value > 9999999 ? 20 : typeof value === 'number' && value > 999999 ? 22 : 28 }}>
+            {typeof value === 'number' ? value.toLocaleString() : value}
+          </div>
           <div className="stat-label">{label}</div>
           {sublabel && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, fontFamily: 'var(--font-mono)' }}>{sublabel}</div>}
         </div>

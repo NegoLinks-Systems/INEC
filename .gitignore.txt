@@ -1,0 +1,7 @@
+node_modules/
+scripts/serviceAccount.json
+scripts/Nigeria_polling_units.csv
+scripts/Nigeria_PU_List_Extracted.csv
+scripts/seed_progress.json
+.env.local
+*.tsbuildinfo

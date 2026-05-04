@@ -248,7 +248,7 @@ export default function FleetTracker() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   return (
-    <div style={{ height: '100%', overflowY: 'auto', padding: 20 }}>
+    <div style={{ height: '100%', overflowY: 'auto', padding: 20, boxSizing: 'border-box' as const }}>
       <div style={{ marginBottom: 20 }}>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 800 }}>
           Fleet Tracker

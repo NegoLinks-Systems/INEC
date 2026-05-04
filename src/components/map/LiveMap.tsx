@@ -204,15 +204,15 @@ export default function LiveMap() {
     })
   }, [])
 
-  // Default center — Nigeria centroid
-  const center: [number, number] = filters.selectedStateId
-    ? [
-        allPUs.find((p) => p.stateId === filters.selectedStateId)?.coordinates.latitude ?? 9.08,
-        allPUs.find((p) => p.stateId === filters.selectedStateId)?.coordinates.longitude ?? 7.49,
-      ]
-    : [9.082, 8.6753]
+
 
   const zoom = filters.selectedWardId ? 14 : filters.selectedLgaId ? 11 : filters.selectedStateId ? 8 : 6
+  const mapCenter: [number, number] = filters.selectedStateId
+    ? [
+        allPUs.find((p) => p.stateId === filters.selectedStateId)?.coordinates.latitude ?? 9.082,
+        allPUs.find((p) => p.stateId === filters.selectedStateId)?.coordinates.longitude ?? 8.0,
+      ]
+    : [9.082, 8.0]
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: 20, gap: 12 }}>
@@ -255,8 +255,8 @@ export default function LiveMap() {
         position: 'relative',
       }}>
         <MapContainer
-          key={`${center[0]}-${center[1]}-${zoom}`}
-          center={center}
+          key={`${mapCenter[0]}-${mapCenter[1]}-${zoom}`}
+          center={mapCenter}
           zoom={zoom}
           style={{ height: '100%', width: '100%' }}
           zoomControl={false}

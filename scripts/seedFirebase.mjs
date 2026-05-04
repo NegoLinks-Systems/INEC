@@ -1,34 +1,40 @@
-// scripts/seedFirebase.ts
-import * as admin from 'firebase-admin'
-import * as fs from 'fs'
+// scripts/seedFirebase.mjs
+// Run with: node scripts/seedFirebase.mjs
+
+import { readFileSync, existsSync } from 'fs'
 import { createRequire } from 'module'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { parse } from 'csv-parse/sync'
 
-// Fix __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 const require = createRequire(import.meta.url)
 
+// Load firebase-admin via require (CommonJS)
+const admin = require('firebase-admin')
+
 // ─── Init Firebase Admin ──────────────────────────────────────────────────────
 const serviceAccountPath = join(__dirname, 'serviceAccount.json')
-if (!fs.existsSync(serviceAccountPath)) {
+if (!existsSync(serviceAccountPath)) {
   console.error('\n❌ Missing: scripts/serviceAccount.json')
-  console.error('   Download from Firebase Console → Project Settings → Service Accounts')
   process.exit(1)
 }
 
+const serviceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf-8'))
+
 admin.initializeApp({
-  credential: admin.credential.cert(require(serviceAccountPath)),
+  credential: admin.credential.cert(serviceAccount),
   projectId: 'inec-9a779',
 })
 
 const db = admin.firestore()
 db.settings({ ignoreUndefinedProperties: true })
 
+console.log('✅ Firebase connected!')
+
 // ─── State coordinates ────────────────────────────────────────────────────────
-const STATE_COORDS: Record<string, { lat: number; lng: number }> = {
+const STATE_COORDS = {
   'abia':        { lat: 5.4527,  lng: 7.5248  },
   'adamawa':     { lat: 9.3265,  lng: 12.3984 },
   'akwa ibom':   { lat: 5.0077,  lng: 7.8537  },
@@ -68,41 +74,25 @@ const STATE_COORDS: Record<string, { lat: number; lng: number }> = {
   'zamfara':     { lat: 12.1700, lng: 6.6600  },
 }
 
-function toId(str: string): string {
+function toId(str) {
   return str.toLowerCase().trim().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')
 }
 
-function titleCase(str: string): string {
-  return str.replace(/\b\w/g, (c: string) => c.toUpperCase())
+function titleCase(str) {
+  return str.replace(/\b\w/g, c => c.toUpperCase())
 }
 
-function jitter(base: number, range = 0.05): number {
+function jitter(base, range = 0.05) {
   return parseFloat((base + (Math.random() - 0.5) * range).toFixed(6))
 }
 
-// ─── Load & Merge Both CSVs ───────────────────────────────────────────────────
-interface PURow {
-  state: string
-  lg: string
-  ward: string
-  stateCode: number
-  lgCode: number
-  wardCode: number
-  puCode: number
-  code: string
-  location: string
-  senatorial: string
-  houseOfRep: string
-  puAddress: string
-}
-
-function loadCSVs(): PURow[] {
+// ─── Load CSVs ────────────────────────────────────────────────────────────────
+function loadCSVs() {
   const f1Candidates = [
     join(__dirname, 'Nigeria_polling_units.csv'),
-    join(process.cwd(), 'Nigeria_polling_units.csv'),
     join(__dirname, '..', 'Nigeria_polling_units.csv'),
   ]
-  const f1Path = f1Candidates.find(p => fs.existsSync(p))
+  const f1Path = f1Candidates.find(p => existsSync(p))
   if (!f1Path) {
     console.error('\n❌ Nigeria_polling_units.csv not found in scripts/ folder')
     process.exit(1)
@@ -110,25 +100,22 @@ function loadCSVs(): PURow[] {
 
   const f2Candidates = [
     join(__dirname, 'Nigeria_PU_List_Extracted.csv'),
-    join(process.cwd(), 'Nigeria_PU_List_Extracted.csv'),
     join(__dirname, '..', 'Nigeria_PU_List_Extracted.csv'),
   ]
-  const f2Path = f2Candidates.find(p => fs.existsSync(p))
+  const f2Path = f2Candidates.find(p => existsSync(p))
 
   console.log(`  ✓ File 1: ${f1Path}`)
 
-  const raw1: Record<string, string>[] = parse(
-    fs.readFileSync(f1Path, 'utf-8'),
-    { columns: true, skip_empty_lines: true, trim: true }
-  )
+  const raw1 = parse(readFileSync(f1Path, 'utf-8'), {
+    columns: true, skip_empty_lines: true, trim: true,
+  })
 
-  const addressMap = new Map<string, string>()
+  const addressMap = new Map()
   if (f2Path) {
     console.log(`  ✓ File 2: ${f2Path}`)
-    const raw2: Record<string, string>[] = parse(
-      fs.readFileSync(f2Path, 'utf-8'),
-      { columns: true, skip_empty_lines: true, trim: true }
-    )
+    const raw2 = parse(readFileSync(f2Path, 'utf-8'), {
+      columns: true, skip_empty_lines: true, trim: true,
+    })
     for (const r of raw2) {
       const code = (r.PU ?? '').trim()
       if (code) addressMap.set(code, (r['PU Address'] ?? '').trim())
@@ -152,7 +139,7 @@ function loadCSVs(): PURow[] {
 }
 
 // ─── Seed States ──────────────────────────────────────────────────────────────
-async function seedStates(stateNames: string[]) {
+async function seedStates(stateNames) {
   console.log('\n📍 Step 1: Seeding states...')
   const batch = db.batch()
   for (const name of stateNames) {
@@ -173,10 +160,9 @@ async function seedStates(stateNames: string[]) {
 }
 
 // ─── Seed LGAs ────────────────────────────────────────────────────────────────
-async function seedLGAs(rows: PURow[]) {
+async function seedLGAs(rows) {
   console.log('\n🏙  Step 2: Seeding LGAs...')
-  const lgaMap = new Map<string, { stateId: string; lgaId: string; name: string; stateCode: number; lgCode: number; coords: { lat: number; lng: number } }>()
-
+  const lgaMap = new Map()
   for (const row of rows) {
     const stateId = toId(row.state)
     const lgaId = `${stateId}_${toId(row.lg)}`
@@ -188,8 +174,7 @@ async function seedLGAs(rows: PURow[]) {
 
   const entries = Array.from(lgaMap.values())
   let batch = db.batch()
-  let ops = 0
-  let batchNum = 0
+  let ops = 0, batchNum = 0
 
   for (const lga of entries) {
     batch.set(db.collection('states').doc(lga.stateId).collection('lgas').doc(lga.lgaId), {
@@ -203,7 +188,7 @@ async function seedLGAs(rows: PURow[]) {
     if (ops >= 400) {
       await batch.commit()
       batchNum++
-      process.stdout.write(`\r  Batch ${batchNum} — ${Math.min(batchNum * 400, entries.length)} / ${entries.length} LGAs`)
+      process.stdout.write(`\r  Committed ${batchNum * 400} / ${entries.length} LGAs`)
       batch = db.batch()
       ops = 0
     }
@@ -213,10 +198,9 @@ async function seedLGAs(rows: PURow[]) {
 }
 
 // ─── Seed Wards ───────────────────────────────────────────────────────────────
-async function seedWards(rows: PURow[]) {
+async function seedWards(rows) {
   console.log('\n🏘  Step 3: Seeding wards...')
-  const wardMap = new Map<string, { stateId: string; lgaId: string; wardId: string; name: string; wardCode: number; coords: { lat: number; lng: number } }>()
-
+  const wardMap = new Map()
   for (const row of rows) {
     const stateId = toId(row.state)
     const lgaId = `${stateId}_${toId(row.lg)}`
@@ -229,8 +213,7 @@ async function seedWards(rows: PURow[]) {
 
   const entries = Array.from(wardMap.values())
   let batch = db.batch()
-  let ops = 0
-  let batchNum = 0
+  let ops = 0, batchNum = 0
 
   for (const w of entries) {
     batch.set(db.collection('states').doc(w.stateId).collection('lgas').doc(w.lgaId).collection('wards').doc(w.wardId), {
@@ -243,7 +226,7 @@ async function seedWards(rows: PURow[]) {
     if (ops >= 400) {
       await batch.commit()
       batchNum++
-      process.stdout.write(`\r  Batch ${batchNum} — ${Math.min(batchNum * 400, entries.length)} / ${entries.length} wards`)
+      process.stdout.write(`\r  Committed ${batchNum * 400} / ${entries.length} wards`)
       batch = db.batch()
       ops = 0
     }
@@ -252,13 +235,11 @@ async function seedWards(rows: PURow[]) {
   console.log(`\n  ✅ ${wardMap.size} wards seeded`)
 }
 
-// ─── Seed Polling Units ───────────────────────────────────────────────────────
-async function seedPUs(rows: PURow[]) {
+// ─── Seed PUs ─────────────────────────────────────────────────────────────────
+async function seedPUs(rows) {
   console.log('\n🗳  Step 4: Seeding polling units...')
   let batch = db.batch()
-  let ops = 0
-  let batchNum = 0
-  let total = 0
+  let ops = 0, batchNum = 0, total = 0
 
   for (const row of rows) {
     if (!row.code) continue
@@ -269,13 +250,17 @@ async function seedPUs(rows: PURow[]) {
     const sc = STATE_COORDS[row.state] ?? { lat: 9.08, lng: 8.67 }
 
     batch.set(
-      db.collection('states').doc(stateId).collection('lgas').doc(lgaId).collection('wards').doc(wardId).collection('polling_units').doc(puId),
+      db.collection('states').doc(stateId)
+        .collection('lgas').doc(lgaId)
+        .collection('wards').doc(wardId)
+        .collection('polling_units').doc(puId),
       {
         puId, puCode: row.code,
         name: row.puAddress ? titleCase(row.puAddress) : row.location ? titleCase(row.location) : `PU ${row.code}`,
         address: row.puAddress || row.location || '',
         wardId, lgaId, stateId,
-        stateCode: row.stateCode, lgCode: row.lgCode, wardCode: row.wardCode, puCode_num: row.puCode,
+        stateCode: row.stateCode, lgCode: row.lgCode,
+        wardCode: row.wardCode, puCode_num: row.puCode,
         coordinates: { latitude: jitter(sc.lat, 0.15), longitude: jitter(sc.lng, 0.15) },
         senatorial: row.senatorial, houseOfRep: row.houseOfRep,
         status: 'pending',
@@ -300,12 +285,12 @@ async function seedPUs(rows: PURow[]) {
   }
   if (ops > 0) {
     await batch.commit()
-    process.stdout.write(`\r  Done — ${total.toLocaleString()} / ${rows.length.toLocaleString()} PUs`)
+    process.stdout.write(`\r  Done — ${total.toLocaleString()} PUs written`)
   }
   console.log(`\n  ✅ ${total.toLocaleString()} polling units seeded`)
 }
 
-// ─── Seed System Config ───────────────────────────────────────────────────────
+// ─── Seed Config & Admin ──────────────────────────────────────────────────────
 async function seedConfig() {
   console.log('\n⚙️  Step 5: Seeding system config...')
   await db.collection('system_config').doc('main').set({
@@ -318,22 +303,20 @@ async function seedConfig() {
 
   await db.collection('system_config').doc('national_stats').set({
     totalPUs: 176846, activePUs: 0, offlinePUs: 0, completedPUs: 0,
-    flaggedPUs: 0, totalVotesCast: 0,
-    totalVehicles: 0, vehiclesInTransit: 0, vehiclesDelivered: 0,
+    flaggedPUs: 0, totalVotesCast: 0, totalVehicles: 0,
+    vehiclesInTransit: 0, vehiclesDelivered: 0,
     lastUpdated: admin.firestore.Timestamp.now(),
   }, { merge: true })
   console.log('  ✅ System config seeded')
 }
 
-// ─── Seed Admin User ──────────────────────────────────────────────────────────
 async function seedAdmin() {
-  const uid = process.env.ADMIN_UID ?? 'EQoYQ1Cs2ZRbqi1SFupVnYBYhWs2'
-  const email = process.env.ADMIN_EMAIL ?? 'admin@inec.gov.ng'
-  console.log(`\n👤 Step 6: Seeding admin user (${email})...`)
+  const uid = 'EQoYQ1Cs2ZRbqi1SFupVnYBYhWs2'
+  console.log(`\n👤 Step 6: Seeding admin user...`)
   await db.collection('users').doc(uid).set({
     userId: uid, fullName: 'INEC Super Administrator',
-    email, phone: '+2348000000000', role: 'superadmin',
-    isActive: true, lastLogin: null,
+    email: 'admin@inec.gov.ng', phone: '+2348000000000',
+    role: 'superadmin', isActive: true, lastLogin: null,
     createdAt: admin.firestore.Timestamp.now(),
     updatedAt: admin.firestore.Timestamp.now(),
   }, { merge: true })
@@ -355,24 +338,21 @@ async function main() {
 
   const stateNames = [...new Set(rows.map(r => r.state))].filter(Boolean).sort()
 
-  try {
-    await seedStates(stateNames)
-    await seedLGAs(rows)
-    await seedWards(rows)
-    await seedPUs(rows)
-    await seedConfig()
-    await seedAdmin()
+  await seedStates(stateNames)
+  await seedLGAs(rows)
+  await seedWards(rows)
+  await seedPUs(rows)
+  await seedConfig()
+  await seedAdmin()
 
-    const mins = ((Date.now() - start) / 60000).toFixed(1)
-    console.log('\n╔══════════════════════════════════════════════╗')
-    console.log(`║  ✅ Complete! Took ${mins} minutes`)
-    console.log('╚══════════════════════════════════════════════╝')
-    console.log('\n✅ All done! Login at: https://inec-xi.vercel.app/login')
-    process.exit(0)
-  } catch (err) {
-    console.error('\n❌ Error:', err)
-    process.exit(1)
-  }
+  const mins = ((Date.now() - start) / 60000).toFixed(1)
+  console.log('\n╔══════════════════════════════════════════════╗')
+  console.log(`║  ✅ Complete! Took ${mins} minutes`)
+  console.log('╚══════════════════════════════════════════════╝')
+  process.exit(0)
 }
 
-main()
+main().catch(err => {
+  console.error('\n❌ Fatal error:', err)
+  process.exit(1)
+})

@@ -152,7 +152,7 @@ function ActiveSession({
           maxWidth: '80%',
           textAlign: 'center',
         }}>
-          ⚠ {error} (PoC: configure AGORA_APP_ID in .env.local)
+          ⚠ {error} — For live video, Agora token server must be configured (Module C)
         </div>
       )}
 
