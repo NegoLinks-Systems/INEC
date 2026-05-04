@@ -1,9 +1,6 @@
 /* src/styles/globals.css */
 /* INEC 2.0 — Design System */
-
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
-
-/* System font fallbacks in case Google Fonts fails to load */
+/* Fonts loaded via Next.js font system in layout.tsx */
 
 :root {
   /* ─── Brand Colors ───────────────────────────────────────── */

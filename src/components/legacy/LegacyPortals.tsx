@@ -1,16 +1,9 @@
 // src/components/legacy/LegacyPortals.tsx
-// ─────────────────────────────────────────────────────────────────────────────
-// INEC 2.0 — Legacy System Harmonization (Module 6)
-// Embeds existing INEC platforms via iframe or API wrapper
-// Creates a unified workspace from multiple legacy portals
-// ─────────────────────────────────────────────────────────────────────────────
-
 'use client'
 
 import React, { useState } from 'react'
-import { Globe, ExternalLink, RefreshCw, Maximize2, Lock, AlertCircle } from 'lucide-react'
+import { Globe, ExternalLink, RefreshCw, Lock, AlertCircle, Chrome } from 'lucide-react'
 
-// ─── Legacy Portal Definitions ────────────────────────────────────────────────
 interface PortalConfig {
   id: string
   name: string
@@ -18,50 +11,45 @@ interface PortalConfig {
   url: string
   icon: string
   category: 'results' | 'registration' | 'logistics' | 'official'
-  requiresVPN: boolean
-  status: 'active' | 'maintenance' | 'demo'
+  status: 'active' | 'maintenance' | 'iframe_blocked'
 }
 
 const LEGACY_PORTALS: PortalConfig[] = [
   {
     id: 'irev',
     name: 'IREV Portal',
-    description: "INEC Result Viewing Portal — official election results viewer",
+    description: 'INEC Result Viewing Portal — official election results viewer',
     url: 'https://irev.inec.gov.ng',
     icon: '🗳️',
     category: 'results',
-    requiresVPN: false,
-    status: 'active',
-  },
-  {
-    id: 'ivs',
-    name: 'IVS — Voter Verification',
-    description: "Independent Voter Self-Service portal for voter status verification",
-    url: 'https://voters.inec.gov.ng',
-    icon: '👤',
-    category: 'registration',
-    requiresVPN: false,
-    status: 'active',
+    status: 'iframe_blocked',
   },
   {
     id: 'inec-main',
     name: 'INEC Official Website',
-    description: 'Main INEC institutional website and press releases',
+    description: 'Main INEC institutional website, press releases and announcements',
     url: 'https://www.inecnigeria.org',
     icon: '🏛️',
     category: 'official',
-    requiresVPN: false,
-    status: 'active',
+    status: 'iframe_blocked',
   },
   {
-    id: 'transferability',
+    id: 'voter-enrollment',
+    name: 'Voter Enrolment Portal',
+    description: 'Online voter registration and enrolment system',
+    url: 'https://revamp.inecnigeria.org',
+    icon: '👤',
+    category: 'registration',
+    status: 'iframe_blocked',
+  },
+  {
+    id: 'pu-finder',
     name: 'Polling Unit Finder',
-    description: 'PU locator and voter transfer management tool',
+    description: 'Locate any polling unit across Nigeria using voter details',
     url: 'https://puff.inec.gov.ng',
     icon: '📍',
     category: 'registration',
-    requiresVPN: false,
-    status: 'active',
+    status: 'iframe_blocked',
   },
   {
     id: 'bvas-portal',
@@ -70,34 +58,27 @@ const LEGACY_PORTALS: PortalConfig[] = [
     url: 'https://bvas.inec.gov.ng',
     icon: '📱',
     category: 'logistics',
-    requiresVPN: true,
     status: 'maintenance',
   },
   {
     id: 'electoral-calendar',
     name: 'Electoral Calendar',
     description: 'Official timetable and schedule of electoral activities',
-    url: 'https://inecnigeria.org/electoral-timetable',
+    url: 'https://www.inecnigeria.org/electoral-timetable-and-schedule-of-activities',
     icon: '📅',
     category: 'official',
-    requiresVPN: false,
-    status: 'active',
+    status: 'iframe_blocked',
   },
 ]
 
 const CATEGORY_COLORS: Record<string, string> = {
-  results: 'var(--green-inec)',
+  results:      'var(--green-inec)',
   registration: 'var(--status-voting)',
-  logistics: 'var(--status-submitted)',
-  official: 'var(--status-collating)',
+  logistics:    'var(--status-submitted)',
+  official:     'var(--status-collating)',
 }
 
-// ─── Portal Tab Button ────────────────────────────────────────────────────────
-function PortalTab({
-  portal,
-  isActive,
-  onClick,
-}: {
+function PortalCard({ portal, isActive, onClick }: {
   portal: PortalConfig
   isActive: boolean
   onClick: () => void
@@ -106,278 +87,163 @@ function PortalTab({
     <button
       onClick={onClick}
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        padding: '8px 14px',
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '10px 14px', width: '100%', textAlign: 'left',
         background: isActive ? 'var(--bg-elevated)' : 'transparent',
-        border: `1px solid ${isActive ? 'var(--bg-border)' : 'transparent'}`,
-        borderBottom: isActive ? '1px solid var(--bg-elevated)' : '1px solid var(--bg-border)',
-        borderRadius: isActive ? '8px 8px 0 0' : 8,
-        cursor: 'pointer',
-        color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-        fontSize: 12,
-        fontWeight: isActive ? 600 : 400,
-        whiteSpace: 'nowrap',
+        border: `1px solid ${isActive ? 'var(--green-dim)' : 'transparent'}`,
+        borderRadius: 8, cursor: 'pointer',
         transition: 'all var(--transition-fast)',
       }}
     >
-      <span>{portal.icon}</span>
-      <span>{portal.name}</span>
+      <span style={{ fontSize: 20 }}>{portal.icon}</span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {portal.name}
+        </div>
+        <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {portal.description}
+        </div>
+      </div>
       {portal.status === 'maintenance' && (
-        <span style={{ fontSize: 9, background: 'rgba(245,158,11,0.15)', color: 'var(--status-offline)', padding: '1px 4px', borderRadius: 3, fontFamily: 'var(--font-mono)' }}>
+        <span style={{ fontSize: 9, background: 'rgba(245,158,11,0.15)', color: 'var(--status-offline)', padding: '2px 6px', borderRadius: 3, fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
           DOWN
         </span>
-      )}
-      {portal.requiresVPN && (
-        <Lock size={10} color="var(--text-muted)" />
       )}
     </button>
   )
 }
 
-// ─── Iframe Viewer ────────────────────────────────────────────────────────────
-function IframeViewer({ portal }: { portal: PortalConfig }) {
-  const [loading, setLoading] = useState(true)
-  const [failed, setFailed] = useState(false)
-  const [key, setKey] = useState(0)
-
-  const refresh = () => {
-    setLoading(true)
-    setFailed(false)
-    setKey((k) => k + 1)
-  }
+function PortalViewer({ portal }: { portal: PortalConfig }) {
+  const [showEmbed, setShowEmbed] = useState(false)
+  const [embedKey, setEmbedKey] = useState(0)
 
   if (portal.status === 'maintenance') {
     return (
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 12,
-        background: 'var(--bg-elevated)',
-        color: 'var(--text-muted)',
-      }}>
-        <AlertCircle size={40} strokeWidth={1} color="var(--status-offline)" />
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--status-offline)' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, padding: 40 }}>
+        <AlertCircle size={48} strokeWidth={1} color="var(--status-offline)" />
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, color: 'var(--status-offline)' }}>
           Portal Under Maintenance
         </div>
-        <div style={{ fontSize: 12, maxWidth: 280, textAlign: 'center', lineHeight: 1.6 }}>
-          {portal.name} is currently unavailable for scheduled maintenance. It will be back online shortly.
+        <div style={{ fontSize: 13, color: 'var(--text-secondary)', textAlign: 'center', maxWidth: 360, lineHeight: 1.7 }}>
+          {portal.name} is currently unavailable. Please try again later.
         </div>
-        <a
-          href={portal.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn btn-secondary btn-sm"
-          style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}
-        >
-          <ExternalLink size={12} />
-          Open in New Tab
+        <a href={portal.url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <ExternalLink size={12} /> Try Direct Link
         </a>
       </div>
     )
   }
 
   return (
-    <div style={{ flex: 1, position: 'relative', background: '#000' }}>
-      {/* Loading overlay */}
-      {loading && !failed && (
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'var(--bg-elevated)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 12,
-          zIndex: 5,
-        }}>
-          <div style={{
-            width: 36,
-            height: 36,
-            border: '2px solid var(--bg-border)',
-            borderTop: '2px solid var(--green-inec)',
-            borderRadius: '50%',
-            animation: 'spin 0.8s linear infinite',
-          }} />
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-            Loading {portal.name}...
-          </div>
-        </div>
-      )}
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* URL bar */}
+      <div style={{ padding: '8px 16px', background: 'var(--bg-elevated)', borderBottom: '1px solid var(--bg-border)', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Lock size={11} color="var(--status-active)" />
+        <span style={{ flex: 1, fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {portal.url}
+        </span>
+        <button onClick={() => { setShowEmbed(false); setEmbedKey(k => k + 1) }} className="btn btn-ghost btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <RefreshCw size={11} /> Retry
+        </button>
+        <a href={portal.url} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <ExternalLink size={11} /> Open
+        </a>
+      </div>
 
-      {/* X-Frame-Options note (most gov sites block iframes) */}
-      {failed && (
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'var(--bg-elevated)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 12,
-          padding: 20,
-        }}>
-          <Lock size={40} strokeWidth={1} color="var(--text-muted)" />
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700 }}>
-            Embedded Access Restricted
+      {/* Embed attempt / fallback */}
+      <div style={{ flex: 1, position: 'relative', background: 'var(--bg-base)' }}>
+        {!showEmbed ? (
+          // Always show the informational panel first
+          <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, padding: 40, textAlign: 'center' }}>
+            <span style={{ fontSize: 48 }}>{portal.icon}</span>
+            <div>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800, marginBottom: 8 }}>
+                {portal.name}
+              </h3>
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', maxWidth: 400, lineHeight: 1.7, marginBottom: 20 }}>
+                {portal.description}
+              </p>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', maxWidth: 440, lineHeight: 1.7, marginBottom: 24 }}>
+                Most Nigerian government websites block embedding for security reasons (X-Frame-Options).
+                Use the <strong style={{ color: 'var(--text-secondary)' }}>Open</strong> button to access in a new tab, or try embedding below.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setShowEmbed(true)} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Chrome size={14} /> Try Embed
+              </button>
+              <a href={portal.url} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <ExternalLink size={14} /> Open in New Tab
+              </a>
+            </div>
           </div>
-          <div style={{ fontSize: 12, maxWidth: 360, textAlign: 'center', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
-            <strong>{portal.url}</strong> has set{' '}
-            <code style={{ fontFamily: 'var(--font-mono)', background: 'var(--bg-card)', padding: '1px 5px', borderRadius: 3 }}>
-              X-Frame-Options: SAMEORIGIN
-            </code>
-            {' '}which prevents iframe embedding.
-            <br /><br />
-            In production, NegoLinks would resolve this via:
-            <br />
-            (1) An API wrapper proxy that calls the portal&apos;s backend directly,
-            <br />
-            (2) A reverse-proxy approach for same-origin compliance, or
-            <br />
-            (3) Direct INEC cooperation to whitelist the dashboard domain.
-          </div>
-          <a
-            href={portal.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-primary btn-sm"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}
-          >
-            <ExternalLink size={12} />
-            Open {portal.name} Directly
-          </a>
-        </div>
-      )}
-
-      <iframe
-        key={key}
-        src={portal.url}
-        style={{
-          width: '100%',
-          height: '100%',
-          border: 'none',
-          display: failed ? 'none' : 'block',
-        }}
-        onLoad={() => setLoading(false)}
-        onError={() => { setLoading(false); setFailed(true) }}
-        title={portal.name}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-      />
+        ) : (
+          <>
+            <iframe
+              key={embedKey}
+              src={portal.url}
+              style={{ width: '100%', height: '100%', border: 'none' }}
+              title={portal.name}
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
+              onError={() => setShowEmbed(false)}
+            />
+            {/* Overlay with open button in case iframe blocked */}
+            <div style={{ position: 'absolute', bottom: 16, right: 16 }}>
+              <a href={portal.url} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, opacity: 0.9 }}>
+                <ExternalLink size={12} /> Open Full Screen
+              </a>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   )
 }
 
-// ─── Legacy Portals Page ──────────────────────────────────────────────────────
 export default function LegacyPortals() {
   const [activePortalId, setActivePortalId] = useState(LEGACY_PORTALS[0].id)
-  const activePortal = LEGACY_PORTALS.find((p) => p.id === activePortalId)!
+  const activePortal = LEGACY_PORTALS.find(p => p.id === activePortalId)!
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Header */}
-      <div style={{
-        padding: '16px 20px',
-        borderBottom: '1px solid var(--bg-border)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Globe size={18} color="var(--green-inec)" />
-          <div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800 }}>
-              Legacy Portals
-            </h2>
-            <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 1 }}>
-              Unified access to all INEC platforms in one workspace
-            </p>
-          </div>
+      <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--bg-border)', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+        <Globe size={18} color="var(--green-inec)" />
+        <div>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800 }}>Legacy Portals</h2>
+          <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 1 }}>
+            Unified access to all INEC platforms · {LEGACY_PORTALS.length} portals integrated
+          </p>
         </div>
-
-        <div style={{ display: 'flex', gap: 8 }}>
-          <a
-            href={activePortal.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-secondary btn-sm"
-            style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}
-          >
-            <ExternalLink size={12} />
-            Open Full Screen
-          </a>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-muted)' }}>
+          <AlertCircle size={12} />
+          Government sites may require opening in new tab
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{
-        display: 'flex',
-        gap: 4,
-        padding: '8px 20px 0',
-        borderBottom: '1px solid var(--bg-border)',
-        overflowX: 'auto',
-      }}>
-        {LEGACY_PORTALS.map((portal) => (
-          <PortalTab
-            key={portal.id}
-            portal={portal}
-            isActive={portal.id === activePortalId}
-            onClick={() => setActivePortalId(portal.id)}
-          />
-        ))}
-      </div>
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        {/* Sidebar */}
+        <div style={{ width: 260, borderRight: '1px solid var(--bg-border)', padding: '12px 8px', overflowY: 'auto', flexShrink: 0 }}>
+          {(['results', 'registration', 'logistics', 'official'] as const).map(cat => {
+            const portals = LEGACY_PORTALS.filter(p => p.category === cat)
+            if (!portals.length) return null
+            return (
+              <div key={cat} style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: CATEGORY_COLORS[cat], padding: '4px 8px', marginBottom: 4 }}>
+                  {cat}
+                </div>
+                {portals.map(portal => (
+                  <PortalCard key={portal.id} portal={portal} isActive={portal.id === activePortalId} onClick={() => setActivePortalId(portal.id)} />
+                ))}
+              </div>
+            )
+          })}
+        </div>
 
-      {/* Portal info bar */}
-      <div style={{
-        padding: '8px 20px',
-        background: 'var(--bg-card)',
-        borderBottom: '1px solid var(--bg-border)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
-      }}>
-        <span style={{
-          fontSize: 9,
-          fontFamily: 'var(--font-mono)',
-          color: CATEGORY_COLORS[activePortal.category],
-          background: `${CATEGORY_COLORS[activePortal.category]}18`,
-          border: `1px solid ${CATEGORY_COLORS[activePortal.category]}30`,
-          padding: '2px 6px',
-          borderRadius: 3,
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-        }}>
-          {activePortal.category}
-        </span>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>
-          {activePortal.url}
-        </span>
-        <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-secondary)' }}>
-          {activePortal.description}
-        </span>
-        {activePortal.requiresVPN && (
-          <span style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
-            fontSize: 10,
-            color: 'var(--status-offline)',
-            fontFamily: 'var(--font-mono)',
-          }}>
-            <Lock size={10} />
-            VPN Required
-          </span>
-        )}
-      </div>
-
-      {/* iframe content */}
-      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <IframeViewer key={activePortalId} portal={activePortal} />
+        {/* Content */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <PortalViewer portal={activePortal} />
+        </div>
       </div>
     </div>
   )
