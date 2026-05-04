@@ -1,10 +1,11 @@
+// src/app/layout.tsx
 import type { Metadata } from 'next'
 import '@/styles/globals.css'
 
 export const metadata: Metadata = {
   title: 'INEC 2.0 — Electoral Operations Command',
   description: 'National Electoral Operations & Logistics Monitoring System — NegoLinks Systems Ltd',
-  icons: { icon: '/inec/inec-logo.png' },
+  icons: { icon: '/favicon.ico' },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

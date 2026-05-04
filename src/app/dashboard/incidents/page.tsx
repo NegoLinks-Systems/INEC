@@ -1,3 +1,2 @@
-// src/app/inec/incidents/page.tsx
 export const dynamic = 'force-dynamic'
 export { default } from '@/components/incidents/IncidentsPanel'

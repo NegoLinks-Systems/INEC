@@ -1,3 +1,2 @@
-// src/app/inec/fleet/page.tsx
 export const dynamic = 'force-dynamic'
 export { default } from '@/components/fleet/FleetTracker'

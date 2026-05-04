@@ -7,7 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed": "ts-node scripts/seedFirebase.ts"
   },
   "dependencies": {
     "agora-rtc-sdk-ng": "^4.20.0",
@@ -33,6 +34,9 @@
     "@types/uuid": "^10",
     "eslint": "^8",
     "eslint-config-next": "14.2.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "firebase-admin": "^12.0.0",
+    "csv-parse": "^5.5.6",
+    "ts-node": "^10.9.2"
   }
 }

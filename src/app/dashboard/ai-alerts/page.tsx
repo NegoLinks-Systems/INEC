@@ -1,3 +1,2 @@
-// src/app/inec/ai-alerts/page.tsx
 export const dynamic = 'force-dynamic'
 export { default } from '@/components/ai/AIAlertsPage'

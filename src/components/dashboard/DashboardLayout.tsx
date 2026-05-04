@@ -135,14 +135,14 @@ export function useFilters() {
 
 // ─── Navigation Items ─────────────────────────────────────────────────────────
 const NAV_ITEMS = [
-  { href: '/inec', label: 'Overview', icon: LayoutDashboard },
-  { href: '/inec/map', label: 'Live Map', icon: Map },
-  { href: '/inec/fleet', label: 'Fleet Tracker', icon: Truck },
-  { href: '/inec/video', label: 'Live Video', icon: Video },
-  { href: '/inec/incidents', label: 'Incidents', icon: AlertTriangle },
-  { href: '/inec/legacy', label: 'Legacy Portals', icon: Globe },
-  { href: '/inec/ai-alerts', label: 'AI Intelligence', icon: BrainCircuit },
-  { href: '/inec/war-room', label: 'War Room', icon: Shield, special: true },
+  { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
+  { href: '/dashboard/map', label: 'Live Map', icon: Map },
+  { href: '/dashboard/fleet', label: 'Fleet Tracker', icon: Truck },
+  { href: '/dashboard/video', label: 'Live Video', icon: Video },
+  { href: '/dashboard/incidents', label: 'Incidents', icon: AlertTriangle },
+  { href: '/dashboard/legacy', label: 'Legacy Portals', icon: Globe },
+  { href: '/dashboard/ai-alerts', label: 'AI Intelligence', icon: BrainCircuit },
+  { href: '/dashboard/war-room', label: 'War Room', icon: Shield, special: true },
 ]
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
@@ -188,7 +188,7 @@ function Sidebar({ isOpen }: { isOpen: boolean }) {
         }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/inec/inec-logo.png"
+            src="/inec-logo.png"
             alt="INEC Logo"
             style={{ width: 44, height: 44, objectFit: 'contain' }}
           />
@@ -497,7 +497,7 @@ function TopBar({
       }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/inec/inec-logo.png"
+          src="/inec-logo.png"
           alt="INEC"
           style={{ width: 32, height: 32, objectFit: 'contain', background: '#000', borderRadius: 6, padding: 2 }}
         />

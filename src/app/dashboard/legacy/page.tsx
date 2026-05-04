@@ -1,3 +1,2 @@
-// src/app/inec/legacy/page.tsx
 export const dynamic = 'force-dynamic'
 export { default } from '@/components/legacy/LegacyPortals'

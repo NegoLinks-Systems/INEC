@@ -194,7 +194,7 @@ export default function OverviewPage() {
             flexShrink: 0,
           }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/inec/inec-logo.png" alt="INEC Logo" style={{ width: 48, height: 48, objectFit: 'contain' }} />
+            <img src="/inec-logo.png" alt="INEC Logo" style={{ width: 48, height: 48, objectFit: 'contain' }} />
           </div>
           <div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 800, letterSpacing: '-0.02em' }}>

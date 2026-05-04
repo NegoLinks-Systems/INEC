@@ -1,3 +1,2 @@
-// src/app/inec/video/page.tsx
 export const dynamic = 'force-dynamic'
 export { default } from '@/components/video/LiveVideoPanel'

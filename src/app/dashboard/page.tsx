@@ -1,3 +1,2 @@
-// src/app/inec/page.tsx
 export const dynamic = 'force-dynamic'
 export { default } from '@/components/dashboard/OverviewPage'

@@ -661,7 +661,7 @@ export default function WarRoom() {
           }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/inec/inec-logo.png"
+              src="/inec-logo.png"
               alt="INEC Logo"
               style={{ width: 40, height: 40, objectFit: 'contain' }}
             />
@@ -692,7 +692,7 @@ export default function WarRoom() {
           <div style={{ height: 28, width: 1, background: 'var(--bg-border)' }} />
 
           <Link
-            href="/inec"
+            href="/dashboard"
             style={{
               display: 'flex',
               alignItems: 'center',

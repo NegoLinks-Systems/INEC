@@ -1,4 +1,2 @@
-// src/app/inec/war-room/page.tsx
 export const dynamic = 'force-dynamic'
-export const runtime = 'edge'
 export { default } from '@/components/warroom/WarRoom'
