@@ -190,7 +190,7 @@ export default function LiveMap() {
         allPUs.find(p => p.stateId === filters.selectedStateId)?.coordinates.latitude ?? 9.082,
         allPUs.find(p => p.stateId === filters.selectedStateId)?.coordinates.longitude ?? 8.0,
       ]
-    : [9.082, 8.0]
+    : [9.5, 7.5]
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: 16, gap: 10 }}>
