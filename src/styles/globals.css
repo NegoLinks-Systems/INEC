@@ -3,6 +3,8 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* System font fallbacks in case Google Fonts fails to load */
+
 :root {
   /* ─── Brand Colors ───────────────────────────────────────── */
   --green-inec: #00a651;        /* INEC primary green */
@@ -45,9 +47,9 @@
   --severity-critical: #ef4444;
 
   /* ─── Typography ─────────────────────────────────────────── */
-  --font-display: 'Syne', sans-serif;
-  --font-mono: 'Space Mono', monospace;
-  --font-body: 'Inter', sans-serif;
+  --font-display: var(--font-syne), 'Syne', system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-space-mono), 'Space Mono', 'Courier New', monospace;
+  --font-body: var(--font-inter), 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   /* ─── Shadows & Glows ────────────────────────────────────── */
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);

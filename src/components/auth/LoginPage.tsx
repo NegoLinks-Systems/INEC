@@ -3,9 +3,9 @@
 
 import React, { useState } from 'react'
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore'
 import { auth, db } from '@/firebase/config'
-import { Shield, Eye, EyeOff, Loader } from 'lucide-react'
+import { Eye, EyeOff, Loader, Lock } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -21,32 +21,67 @@ export default function LoginPage() {
 
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password)
-      // Check role in Firestore
-      const userDoc = await getDoc(doc(db, 'users', credential.user.uid))
+      const uid = credential.user.uid
+
+      // Check if user profile exists in Firestore
+      const userRef = doc(db, 'users', uid)
+      const userDoc = await getDoc(userRef)
+
       if (!userDoc.exists()) {
-        setError('User profile not found. Contact your administrator.')
-        await auth.signOut()
-        setIsLoading(false)
-        return
-      }
-      const role = userDoc.data().role
-      const adminRoles = ['superadmin', 'state_admin', 'lga_admin', 'observer']
-      if (!adminRoles.includes(role)) {
-        setError('Access denied. This dashboard is for admin users only.')
-        await auth.signOut()
-        setIsLoading(false)
-        return
-      }
-      // Redirect to dashboard
-      window.location.href = '/dashboard'
-    } catch (err: unknown) {
-      const code = (err as { code?: string }).code
-      if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
-        setError('Invalid email or password.')
-      } else if (code === 'auth/too-many-requests') {
-        setError('Too many failed attempts. Please try again later.')
+        // Auto-create profile for first superadmin login
+        // In production this would be locked down
+        await setDoc(userRef, {
+          userId: uid,
+          fullName: 'INEC Super Administrator',
+          email: credential.user.email ?? email,
+          phone: '',
+          role: 'superadmin',
+          isActive: true,
+          lastLogin: Timestamp.now(),
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
+        })
       } else {
-        setError('Login failed. Please check your connection and try again.')
+        // Update last login
+        const data = userDoc.data()
+        const role = data?.role ?? ''
+        const allowedRoles = ['superadmin', 'state_admin', 'lga_admin', 'ward_officer', 'observer']
+        if (!allowedRoles.includes(role)) {
+          setError('Access denied. Contact your administrator.')
+          await auth.signOut()
+          setIsLoading(false)
+          return
+        }
+        if (!data?.isActive) {
+          setError('Your account has been deactivated. Contact your administrator.')
+          await auth.signOut()
+          setIsLoading(false)
+          return
+        }
+      }
+
+      // Successful login — redirect
+      window.location.href = '/dashboard'
+
+    } catch (err: unknown) {
+      const code = (err as { code?: string }).code ?? ''
+      if (
+        code === 'auth/user-not-found' ||
+        code === 'auth/wrong-password' ||
+        code === 'auth/invalid-credential' ||
+        code === 'auth/invalid-email'
+      ) {
+        setError('Invalid email or password. Please try again.')
+      } else if (code === 'auth/too-many-requests') {
+        setError('Too many failed attempts. Please wait a few minutes and try again.')
+      } else if (code === 'auth/network-request-failed') {
+        setError('Network error. Please check your internet connection.')
+      } else if (code === 'auth/user-disabled') {
+        setError('This account has been disabled. Contact your administrator.')
+      } else {
+        // Log the actual error in console for debugging
+        console.error('Login error:', err)
+        setError(`Login failed (${code || 'unknown'}). Please try again.`)
       }
       setIsLoading(false)
     }
@@ -60,207 +95,265 @@ export default function LoginPage() {
       alignItems: 'center',
       justifyContent: 'center',
       padding: 20,
-      fontFamily: 'var(--font-body)',
+      position: 'relative',
+      overflow: 'hidden',
     }}>
-      {/* Background pattern */}
+
+      {/* Background glow effects */}
       <div style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundImage: `radial-gradient(circle at 20% 50%, rgba(0,166,81,0.05) 0%, transparent 50%),
-                          radial-gradient(circle at 80% 20%, rgba(0,166,81,0.03) 0%, transparent 50%)`,
-        pointerEvents: 'none',
+        position: 'fixed', inset: 0, pointerEvents: 'none',
+        background: `
+          radial-gradient(ellipse at 30% 50%, rgba(0,166,81,0.07) 0%, transparent 60%),
+          radial-gradient(ellipse at 70% 30%, rgba(0,100,50,0.05) 0%, transparent 60%)
+        `,
       }} />
 
+      {/* Grid pattern */}
       <div style={{
-        width: '100%',
-        maxWidth: 420,
-        position: 'relative',
-        zIndex: 1,
-      }}>
-        {/* Logo card */}
+        position: 'fixed', inset: 0, pointerEvents: 'none', opacity: 0.03,
+        backgroundImage: `linear-gradient(var(--bg-border) 1px, transparent 1px),
+                          linear-gradient(90deg, var(--bg-border) 1px, transparent 1px)`,
+        backgroundSize: '40px 40px',
+      }} />
+
+      <div style={{ width: '100%', maxWidth: 440, position: 'relative', zIndex: 1 }}>
+
+        {/* Top badge */}
+        <div style={{
+          textAlign: 'center', marginBottom: 24,
+        }}>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            fontSize: 10, fontFamily: 'monospace', letterSpacing: '0.15em',
+            color: 'var(--green-inec)', fontWeight: 700,
+            background: 'rgba(0,166,81,0.08)',
+            border: '1px solid rgba(0,166,81,0.25)',
+            padding: '5px 14px', borderRadius: 20,
+          }}>
+            <Lock size={9} /> AUTHORIZED PERSONNEL ONLY
+          </span>
+        </div>
+
+        {/* Main card */}
         <div style={{
           background: 'var(--bg-card)',
           border: '1px solid var(--bg-border)',
-          borderRadius: 16,
-          padding: '40px 36px',
-          boxShadow: 'var(--shadow-elevated)',
+          borderRadius: 20,
+          overflow: 'hidden',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,166,81,0.05)',
         }}>
-          {/* INEC Logo + Title */}
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <div style={{
-              width: 80,
-              height: 80,
-              background: '#000',
-              borderRadius: 16,
-              border: '2px solid var(--green-dim)',
-              boxShadow: 'var(--glow-green)',
-              margin: '0 auto 16px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              overflow: 'hidden',
-            }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/inec-logo.png"
-                alt="INEC Logo"
-                style={{ width: 76, height: 76, objectFit: 'contain' }}
-              />
-            </div>
-            <h1 style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 22,
-              fontWeight: 800,
-              color: 'var(--text-primary)',
-              marginBottom: 4,
-              letterSpacing: '-0.02em',
-            }}>
-              INEC Command Dashboard
-            </h1>
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>
-              ELECTORAL OPERATIONS MONITORING
-            </p>
-            <div style={{
-              marginTop: 8,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              background: 'rgba(0,166,81,0.08)',
-              border: '1px solid rgba(0,166,81,0.2)',
-              borderRadius: 20,
-              padding: '4px 12px',
-            }}>
-              <Shield size={10} color="var(--green-inec)" />
-              <span style={{ fontSize: 10, color: 'var(--green-inec)', fontFamily: 'var(--font-mono)', letterSpacing: '0.08em' }}>
-                AUTHORIZED PERSONNEL ONLY
-              </span>
-            </div>
-          </div>
 
-          {/* Form */}
-          <form onSubmit={handleLogin}>
-            <div style={{ marginBottom: 16 }}>
-              <label style={{
-                display: 'block',
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                color: 'var(--text-secondary)',
-                marginBottom: 6,
-              }}>
-                Email Address
-              </label>
-              <input
-                className="input"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="officer@inec.gov.ng"
-                required
-                autoComplete="email"
-                style={{ fontSize: 14 }}
-              />
-            </div>
+          {/* Green top bar */}
+          <div style={{
+            height: 4,
+            background: 'linear-gradient(90deg, #00a651, #00cc66, #00a651)',
+          }} />
 
-            <div style={{ marginBottom: 24 }}>
-              <label style={{
-                display: 'block',
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                color: 'var(--text-secondary)',
-                marginBottom: 6,
-              }}>
-                Password
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  className="input"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  autoComplete="current-password"
-                  style={{ fontSize: 14, paddingRight: 40 }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(v => !v)}
-                  style={{
-                    position: 'absolute',
-                    right: 10,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: 'var(--text-muted)',
-                    padding: 4,
-                  }}
-                >
-                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-                </button>
-              </div>
-            </div>
+          <div style={{ padding: '36px 36px 32px' }}>
 
-            {/* Error */}
-            {error && (
+            {/* Logo + Title */}
+            <div style={{ textAlign: 'center', marginBottom: 32 }}>
               <div style={{
-                background: 'rgba(239,68,68,0.1)',
-                border: '1px solid rgba(239,68,68,0.3)',
-                borderRadius: 8,
-                padding: '10px 14px',
-                marginBottom: 16,
-                fontSize: 13,
-                color: 'var(--severity-critical)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
+                width: 88, height: 88,
+                background: '#000',
+                borderRadius: 18,
+                border: '1px solid rgba(0,166,81,0.3)',
+                boxShadow: '0 0 30px rgba(0,166,81,0.15)',
+                margin: '0 auto 20px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                overflow: 'hidden',
               }}>
-                ⚠ {error}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/inec-logo.png"
+                  alt="INEC Logo"
+                  style={{ width: 80, height: 80, objectFit: 'contain' }}
+                />
               </div>
-            )}
 
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={isLoading}
-              style={{
-                width: '100%',
-                padding: '12px',
-                fontSize: 14,
-                justifyContent: 'center',
-                opacity: isLoading ? 0.7 : 1,
-              }}
-            >
-              {isLoading ? (
-                <><Loader size={14} style={{ animation: 'spin 0.8s linear infinite' }} /> Signing in...</>
-              ) : (
-                <><Shield size={14} /> Sign In to Dashboard</>
+              <h1 style={{
+                fontSize: 22, fontWeight: 800,
+                color: '#ffffff',
+                marginBottom: 6, lineHeight: 1.2,
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+                letterSpacing: '-0.03em',
+              }}>
+                INEC Command Dashboard
+              </h1>
+              <p style={{
+                fontSize: 12, color: 'var(--text-secondary)',
+                letterSpacing: '0.05em', fontFamily: 'monospace',
+              }}>
+                ELECTORAL OPERATIONS MONITORING · 2.0
+              </p>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+
+              {/* Email */}
+              <div>
+                <label style={{
+                  display: 'block', marginBottom: 7,
+                  fontSize: 11, fontWeight: 700,
+                  letterSpacing: '0.1em', textTransform: 'uppercase',
+                  color: '#a0aec0',
+                }}>
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="officer@inec.gov.ng"
+                  required
+                  autoComplete="email"
+                  style={{
+                    width: '100%', padding: '11px 14px',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--bg-border)',
+                    borderRadius: 10, outline: 'none',
+                    color: '#e8edf5', fontSize: 14,
+                    fontFamily: 'system-ui, sans-serif',
+                    boxSizing: 'border-box',
+                    transition: 'border-color 0.15s',
+                  }}
+                  onFocus={e => e.target.style.borderColor = '#00a651'}
+                  onBlur={e => e.target.style.borderColor = 'var(--bg-border)'}
+                />
+              </div>
+
+              {/* Password */}
+              <div>
+                <label style={{
+                  display: 'block', marginBottom: 7,
+                  fontSize: 11, fontWeight: 700,
+                  letterSpacing: '0.1em', textTransform: 'uppercase',
+                  color: '#a0aec0',
+                }}>
+                  Password
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="••••••••••••"
+                    required
+                    autoComplete="current-password"
+                    style={{
+                      width: '100%', padding: '11px 42px 11px 14px',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--bg-border)',
+                      borderRadius: 10, outline: 'none',
+                      color: '#e8edf5', fontSize: 14,
+                      fontFamily: 'system-ui, sans-serif',
+                      boxSizing: 'border-box',
+                      transition: 'border-color 0.15s',
+                    }}
+                    onFocus={e => e.target.style.borderColor = '#00a651'}
+                    onBlur={e => e.target.style.borderColor = 'var(--bg-border)'}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(v => !v)}
+                    style={{
+                      position: 'absolute', right: 12, top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none', border: 'none',
+                      cursor: 'pointer', color: '#4a5568', padding: 4,
+                      display: 'flex', alignItems: 'center',
+                    }}
+                  >
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Error message */}
+              {error && (
+                <div style={{
+                  background: 'rgba(239,68,68,0.1)',
+                  border: '1px solid rgba(239,68,68,0.3)',
+                  borderRadius: 8, padding: '10px 14px',
+                  fontSize: 13, color: '#fc8181',
+                  display: 'flex', alignItems: 'flex-start', gap: 8,
+                  lineHeight: 1.5,
+                }}>
+                  <span style={{ fontSize: 15, flexShrink: 0 }}>⚠</span>
+                  <span>{error}</span>
+                </div>
               )}
-            </button>
-          </form>
+
+              {/* Submit button */}
+              <button
+                type="submit"
+                disabled={isLoading || !email || !password}
+                style={{
+                  width: '100%', padding: '13px',
+                  background: isLoading || !email || !password
+                    ? 'rgba(0,166,81,0.4)'
+                    : '#00a651',
+                  border: 'none', borderRadius: 10,
+                  color: '#fff', fontSize: 15, fontWeight: 700,
+                  cursor: isLoading || !email || !password ? 'not-allowed' : 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  transition: 'all 0.15s',
+                  letterSpacing: '0.02em',
+                  boxShadow: isLoading ? 'none' : '0 4px 20px rgba(0,166,81,0.3)',
+                }}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader size={15} style={{ animation: 'spin 0.8s linear infinite' }} />
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign In to Dashboard'
+                )}
+              </button>
+            </form>
+          </div>
 
           {/* Footer */}
           <div style={{
-            marginTop: 24,
-            paddingTop: 20,
+            padding: '16px 36px 24px',
             borderTop: '1px solid var(--bg-border)',
             textAlign: 'center',
           }}>
-            <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-              Access restricted to authorized INEC personnel.<br />
+            <p style={{ fontSize: 11, color: '#4a5568', lineHeight: 1.7 }}>
+              Restricted to authorized INEC personnel only.<br />
               Contact your supervisor if you need access.
             </p>
-            <p style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 8, fontFamily: 'var(--font-mono)' }}>
+            <p style={{
+              fontSize: 10, color: '#2d3748', marginTop: 8,
+              fontFamily: 'monospace', letterSpacing: '0.05em',
+            }}>
               Powered by NegoLinks Systems Ltd
             </p>
           </div>
         </div>
+
+        {/* Version tag */}
+        <p style={{
+          textAlign: 'center', marginTop: 20,
+          fontSize: 10, color: '#2d3748', fontFamily: 'monospace',
+        }}>
+          INEC 2.0 · BUILD {new Date().getFullYear()}
+        </p>
       </div>
+
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        input::placeholder { color: #2d3748; }
+        input:-webkit-autofill {
+          -webkit-box-shadow: 0 0 0 30px #1a2235 inset !important;
+          -webkit-text-fill-color: #e8edf5 !important;
+        }
+      `}</style>
     </div>
   )
 }
