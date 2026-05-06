@@ -186,15 +186,26 @@ export default function LiveMap() {
 
   // Nigeria center
   const zoom = filters.selectedWardId ? 11 : filters.selectedLgaId ? 10 : filters.selectedStateId ? 7 : 6
-  // Use state coordinates from MOCK_STATES for accurate centering
-  const selectedStateCoords = useMemo(() => {
-    if (!filters.selectedStateId) return null
-    const { MOCK_STATES } = require('@/firebase/mockData')
-    const state = MOCK_STATES.find((s: {stateId: string; coordinates: {latitude: number; longitude: number}}) => s.stateId === filters.selectedStateId)
-    return state ? [state.coordinates.latitude, state.coordinates.longitude] as [number, number] : null
-  }, [filters.selectedStateId])
-
-  const mapCenter: [number, number] = selectedStateCoords ?? [9.5, 8.0]
+  // Nigeria center - fixed coordinates showing full country
+  const NIGERIA_CENTER: [number, number] = [9.0, 7.0]
+  const STATE_CENTERS: Record<string, [number, number]> = {
+    'abia': [5.45, 7.52], 'adamawa': [9.33, 12.40], 'akwa_ibom': [5.01, 7.85],
+    'anambra': [6.21, 7.07], 'bauchi': [10.32, 9.84], 'bayelsa': [4.93, 6.27],
+    'benue': [7.19, 8.13], 'borno': [11.83, 13.15], 'cross_river': [5.87, 8.60],
+    'delta': [5.53, 5.90], 'ebonyi': [6.26, 8.01], 'edo': [6.34, 5.60],
+    'ekiti': [7.72, 5.31], 'enugu': [6.46, 7.55], 'abuja': [9.06, 7.50],
+    'gombe': [10.29, 11.17], 'imo': [5.49, 7.03], 'jigawa': [12.23, 9.56],
+    'kaduna': [10.52, 7.44], 'kano': [12.00, 8.59], 'katsina': [12.98, 7.62],
+    'kebbi': [12.45, 4.20], 'kogi': [7.73, 6.69], 'kwara': [8.97, 4.39],
+    'lagos': [6.52, 3.38], 'nasarawa': [8.54, 8.32], 'niger': [9.93, 5.60],
+    'ogun': [7.16, 3.35], 'ondo': [7.25, 5.20], 'osun': [7.78, 4.54],
+    'oyo': [8.16, 3.61], 'plateau': [9.22, 9.52], 'rivers': [4.82, 7.05],
+    'sokoto': [13.01, 5.25], 'taraba': [8.89, 11.36], 'yobe': [12.29, 11.44],
+    'zamfara': [12.17, 6.66],
+  }
+  const mapCenter: [number, number] = filters.selectedStateId
+    ? (STATE_CENTERS[filters.selectedStateId] ?? NIGERIA_CENTER)
+    : NIGERIA_CENTER
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: 16, gap: 10 }}>
