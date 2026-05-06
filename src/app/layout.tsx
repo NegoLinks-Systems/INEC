@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import { Inter, Space_Mono, Syne } from 'next/font/google'
 import '@/styles/globals.css'
+import 'leaflet/dist/leaflet.css'
+import 'react-leaflet-cluster/lib/assets/MarkerCluster.css'
+import 'react-leaflet-cluster/lib/assets/MarkerCluster.Default.css'
 
 const inter = Inter({
   subsets: ['latin'],
