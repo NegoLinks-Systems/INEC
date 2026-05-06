@@ -127,7 +127,8 @@ function LeafletCSSFix() {
     const style = document.createElement('style')
     style.innerHTML = `
       .leaflet-tile { filter: none !important; }
-      .leaflet-container { background: #e8f4f0 !important; }
+      .leaflet-tile-container { pointer-events: none; }
+      .leaflet-container { background: #a8c8a8 !important; font-family: system-ui !important; }
       .leaflet-popup-content-wrapper {
         background: #fff !important;
         border: 1px solid #e2e8f0 !important;
@@ -184,13 +185,16 @@ export default function LiveMap() {
   }, [])
 
   // Nigeria center
-  const zoom = filters.selectedWardId ? 14 : filters.selectedLgaId ? 12 : filters.selectedStateId ? 8 : 6
-  const mapCenter: [number, number] = filters.selectedStateId
-    ? [
-        allPUs.find(p => p.stateId === filters.selectedStateId)?.coordinates.latitude ?? 9.082,
-        allPUs.find(p => p.stateId === filters.selectedStateId)?.coordinates.longitude ?? 8.0,
-      ]
-    : [9.5, 7.5]
+  const zoom = filters.selectedWardId ? 11 : filters.selectedLgaId ? 10 : filters.selectedStateId ? 7 : 6
+  // Use state coordinates from MOCK_STATES for accurate centering
+  const selectedStateCoords = useMemo(() => {
+    if (!filters.selectedStateId) return null
+    const { MOCK_STATES } = require('@/firebase/mockData')
+    const state = MOCK_STATES.find((s: {stateId: string; coordinates: {latitude: number; longitude: number}}) => s.stateId === filters.selectedStateId)
+    return state ? [state.coordinates.latitude, state.coordinates.longitude] as [number, number] : null
+  }, [filters.selectedStateId])
+
+  const mapCenter: [number, number] = selectedStateCoords ?? [9.5, 8.0]
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: 16, gap: 10 }}>
@@ -230,7 +234,7 @@ export default function LiveMap() {
       }}>
         <LeafletCSSFix />
         <MapContainer
-          key={`map-${mapCenter[0].toFixed(2)}-${mapCenter[1].toFixed(2)}-${zoom}`}
+          key={`map-${filters.selectedStateId ?? 'all'}-${filters.selectedLgaId ?? ''}-${filters.selectedWardId ?? ''}`}
           center={mapCenter}
           zoom={zoom}
           style={{ height: '100%', width: '100%' }}
