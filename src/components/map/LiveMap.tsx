@@ -187,7 +187,7 @@ export default function LiveMap() {
   // Nigeria center
   const zoom = filters.selectedWardId ? 11 : filters.selectedLgaId ? 10 : filters.selectedStateId ? 7 : 6
   // Nigeria center - fixed coordinates showing full country
-  const NIGERIA_CENTER: [number, number] = [9.0, 7.0]
+  const NIGERIA_CENTER: [number, number] = [8.0, 7.5]
   const STATE_CENTERS: Record<string, [number, number]> = {
     'abia': [5.45, 7.52], 'adamawa': [9.33, 12.40], 'akwa_ibom': [5.01, 7.85],
     'anambra': [6.21, 7.07], 'bauchi': [10.32, 9.84], 'bayelsa': [4.93, 6.27],
