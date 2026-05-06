@@ -16,7 +16,7 @@ const MarkerClusterGroup = dynamic(() => import('react-leaflet-cluster'), { ssr:
 // ─── Nigeria bounding box center ─────────────────────────────────────────────
 // Nigeria: 4°N–14°N, 3°E–15°E → geographic center ≈ 9°N, 8°E
 const NIGERIA: [number, number] = [9.0, 8.0]
-const ZOOM_NATIONAL = 6
+const ZOOM_NATIONAL = 7
 
 const STATE_CENTERS: Record<string, [number, number]> = {
   'abia': [5.45, 7.52], 'adamawa': [9.33, 12.40], 'akwa_ibom': [5.01, 7.85],
@@ -140,8 +140,8 @@ export default function LiveMap() {
         `}</style>
 
         <MapContainer
-          center={NIGERIA}
-          zoom={ZOOM_NATIONAL}
+          center={[9.0, 8.0]}
+          zoom={7}
           style={{ height: '100%', width: '100%', position: 'absolute', inset: 0 }}
           zoomControl={true}
           scrollWheelZoom={true}
