@@ -495,3 +495,48 @@ export function useLiveAlerts() {
 
   return { alerts, isLoading, markRead, dismiss }
 }
+
+// ─── Live PUs via collectionGroup (for map) ───────────────────────────────────
+export function useLiveAllPUs(stateId: string | null) {
+  const [pus, setPUs]         = useState<LivePU[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    setIsLoading(true)
+    const q = stateId
+      ? query(collectionGroup(db, 'polling_units'), where('stateId', '==', stateId), limit(500))
+      : query(collectionGroup(db, 'polling_units'), limit(300))
+
+    const unsub = onSnapshot(q, (snap) => {
+      const data: LivePU[] = snap.docs.map(d => {
+        const r = d.data()
+        return {
+          puId:                d.id,
+          puCode:              r.puCode              ?? d.id,
+          name:                r.name                ?? 'Polling Unit',
+          stateId:             r.stateId             ?? '',
+          lgaId:               r.lgaId               ?? '',
+          wardId:              r.wardId              ?? '',
+          status:              r.status              ?? 'pending',
+          coordinates:         r.coordinates
+            ? { latitude: r.coordinates.latitude, longitude: r.coordinates.longitude }
+            : { latitude: 9.08 + (Math.random() - 0.5) * 8, longitude: 8.67 + (Math.random() - 0.5) * 8 },
+          registeredVoters:    r.registeredVoters    ?? 0,
+          accreditedVoters:    r.accreditedVoters    ?? 0,
+          totalVotesCast:      r.totalVotesCast      ?? 0,
+          assignedOfficerName: r.assignedOfficerName ?? 'Unassigned',
+          isFlagged:           r.isFlagged           ?? false,
+          hasGuaranteedNetwork: r.hasGuaranteedNetwork ?? false,
+          networkType:         r.networkType         ?? 'lte',
+          materialsDelivered:  r.materialsDelivered  ?? false,
+        }
+      })
+      setPUs(data)
+      setIsLoading(false)
+    }, () => setIsLoading(false))
+
+    return () => unsub()
+  }, [stateId])
+
+  return { pus, isLoading }
+}

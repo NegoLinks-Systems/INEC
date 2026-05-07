@@ -4,8 +4,9 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { Truck, MapPin, AlertTriangle } from 'lucide-react'
-import { getAllMockPUs, MOCK_VEHICLES } from '@/firebase/mockData'
+import { MOCK_VEHICLES } from '@/firebase/mockData'
 import { useFilters } from '../dashboard/DashboardLayout'
+import { useLiveAllPUs } from '@/hooks/firebase/useFirestore'
 
 const MapContainer  = dynamic(() => import('react-leaflet').then(m => m.MapContainer),  { ssr: false })
 const TileLayer     = dynamic(() => import('react-leaflet').then(m => m.TileLayer),     { ssr: false })
@@ -79,7 +80,7 @@ const MapControllerDynamic = dynamic(() => Promise.resolve(MapController), { ssr
 
 export default function LiveMap() {
   const { filters } = useFilters()
-  const allPUs = getAllMockPUs()
+  const { pus: allPUs } = useLiveAllPUs(filters.selectedStateId)
   const [showPUs, setShowPUs]         = useState(true)
   const [showVehicles, setShowVehicles] = useState(true)
   const [showIncidents, setShowIncidents] = useState(false)

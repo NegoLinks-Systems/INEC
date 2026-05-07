@@ -8,7 +8,8 @@ import {
   Activity, Wifi, WifiOff, CheckCircle, Clock,
   AlertTriangle, Truck, BarChart3, RefreshCw, Flag
 } from 'lucide-react'
-import { MOCK_STATES, NATIONAL_STATS, getAllMockPUs, MockPU } from '@/firebase/mockData'
+import { MOCK_STATES, NATIONAL_STATS, MockPU } from '@/firebase/mockData'
+import { useLiveAllPUs } from '@/hooks/firebase/useFirestore'
 import { useLiveNationalStats, useLiveStates } from '@/hooks/firebase/useFirestore'
 import { PUStatus } from '@/firebase/schema'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
@@ -164,7 +165,7 @@ function StateVoteChart() {
 export default function OverviewPage() {
   const { filters, selectedState, selectedLGA } = useFilters()
   const [lastRefresh, setLastRefresh] = useState(new Date())
-  const allPUs = getAllMockPUs()
+  const { pus: allPUs } = useLiveAllPUs(null)
   const liveStats = useLiveNationalStats()
   const { states: liveStates } = useLiveStates()
 
@@ -264,7 +265,7 @@ export default function OverviewPage() {
         </div>
       )}
 
-      <PUTable pus={visiblePUs} />
+      <PUTable pus={visiblePUs as unknown as MockPU[]} />
     </div>
   )
 }
