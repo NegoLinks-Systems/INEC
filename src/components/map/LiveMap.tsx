@@ -110,7 +110,7 @@ export default function LiveMap() {
         <div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800 }}>Live Operations Map</h2>
           <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>
-            {visiblePUs.length} Polling Units · {visibleVehicles.length} Vehicles · Nigeria
+            {visiblePUs.length.toLocaleString()} Polling Units loaded · {visibleVehicles.length} Vehicles · Nigeria
           </p>
         </div>
         <div style={{ display: 'flex', gap: 6 }}>

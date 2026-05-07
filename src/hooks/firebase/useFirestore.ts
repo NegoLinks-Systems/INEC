@@ -504,8 +504,8 @@ export function useLiveAllPUs(stateId: string | null) {
   useEffect(() => {
     setIsLoading(true)
     const q = stateId
-      ? query(collectionGroup(db, 'polling_units'), where('stateId', '==', stateId), limit(500))
-      : query(collectionGroup(db, 'polling_units'), limit(300))
+      ? query(collectionGroup(db, 'polling_units'), where('stateId', '==', stateId), limit(1000))
+      : query(collectionGroup(db, 'polling_units'), limit(500))
 
     const unsub = onSnapshot(q, (snap) => {
       const data: LivePU[] = snap.docs.map(d => {
