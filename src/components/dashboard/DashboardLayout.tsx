@@ -16,7 +16,7 @@ import {
   Settings, LogOut, Menu, X, Activity, Users
 } from 'lucide-react'
 import { MOCK_STATES, MockState, MockLGA, MockWard } from '@/firebase/mockData'
-import { useLiveStates, useLiveLGAs, useLiveWards, LiveState, LiveLGA, LiveWard } from '@/hooks/firebase/useFirestore'
+import { useLiveStates, useLiveLGAs, useLiveWards, useLiveWardPUs, LiveState, LiveLGA, LiveWard } from '@/hooks/firebase/useFirestore'
 
 // ─── Filter State & Reducer ───────────────────────────────────────────────────
 export interface FilterState {
@@ -381,22 +381,14 @@ function FilterBar() {
 
       {/* PU */}
       {filters.selectedWardId && (() => {
-        const ward = filters.availableWards.find((w) => w.wardId === filters.selectedWardId)
         return (
-          <div style={{ position: 'relative' }}>
-            <select
-              className="select"
-              style={{ width: 200 }}
-              value={filters.selectedPUId || ''}
-              onChange={(e) => dispatch({ type: 'SELECT_PU', puId: e.target.value || null })}
-            >
-              <option value="">All Polling Units</option>
-              {ward?.pollingUnits.map((pu) => (
-                <option key={pu.puId} value={pu.puId}>{pu.puCode} — {pu.name}</option>
-              ))}
-            </select>
-            <ChevronDown size={12} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
-          </div>
+          <WardPUDropdown
+            stateId={filters.selectedStateId}
+            lgaId={filters.selectedLgaId}
+            wardId={filters.selectedWardId}
+            selectedPUId={filters.selectedPUId}
+            onSelect={(puId) => dispatch({ type: 'SELECT_PU', puId })}
+          />
         )
       })()}
 
@@ -525,6 +517,32 @@ function TopBar({
 }
 
 // ─── Main Dashboard Layout ────────────────────────────────────────────────────
+
+// ─── Ward PU Dropdown — loads real PUs from Firebase ─────────────────────────
+function WardPUDropdown({ stateId, lgaId, wardId, selectedPUId, onSelect }: {
+  stateId: string | null; lgaId: string | null; wardId: string | null
+  selectedPUId: string | null; onSelect: (puId: string | null) => void
+}) {
+  const { pus, isLoading } = useLiveWardPUs(stateId, lgaId, wardId)
+  return (
+    <div style={{ position: 'relative' }}>
+      <select
+        className="select"
+        style={{ width: 200 }}
+        value={selectedPUId || ''}
+        onChange={(e) => onSelect(e.target.value || null)}
+        disabled={isLoading}
+      >
+        <option value="">{isLoading ? 'Loading PUs...' : `All Polling Units (${pus.length})`}</option>
+        {pus.map((pu) => (
+          <option key={pu.puId} value={pu.puId}>{pu.puCode} — {pu.name}</option>
+        ))}
+      </select>
+      <ChevronDown size={12} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+    </div>
+  )
+}
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [filters, dispatch] = useReducer(filterReducer, initialFilterState)
   const [sidebarOpen, setSidebarOpen] = useState(true)
