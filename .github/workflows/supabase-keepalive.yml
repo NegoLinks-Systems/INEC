@@ -1,0 +1,130 @@
+name: NegoLinks — Supabase Keep Alive
+
+on:
+  schedule:
+    # Runs every 5 days at 8:00 AM UTC (9:00 AM WAT — Nigeria time)
+    - cron: '0 8 */5 * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions UI
+
+jobs:
+  keep-alive:
+    name: Ping All Active Supabase Projects
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🏥 Hospital Management ERP
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://cdhykgvciawzfubalxdu.supabase.co/rest/v1/" \
+            -H "apikey: sb_publishable_JBWzwZysYU4spCmAj257SQ_NZO8oTgM" \
+            -H "Authorization: Bearer sb_publishable_JBWzwZysYU4spCmAj257SQ_NZO8oTgM")
+          echo "Hospital Management ERP → HTTP $STATUS"
+
+      - name: 🏨 Hotel & Hospitality ERP
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://aovyugcxrrkjkzauoomb.supabase.co/rest/v1/" \
+            -H "apikey: sb_publishable_MQIZYVhQiMHM88OREMBuUg_68Kyzjrw" \
+            -H "Authorization: Bearer sb_publishable_MQIZYVhQiMHM88OREMBuUg_68Kyzjrw")
+          echo "Hotel & Hospitality ERP → HTTP $STATUS"
+
+      - name: 🏗️ Construction & Project Management ERP
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://okugsvhsefliszdwfegq.supabase.co/rest/v1/" \
+            -H "apikey: sb_publishable_9SIA2qRM_XCsRuI7EzXJKA_HZ4HX3gL" \
+            -H "Authorization: Bearer sb_publishable_9SIA2qRM_XCsRuI7EzXJKA_HZ4HX3gL")
+          echo "Construction & Project Management ERP → HTTP $STATUS"
+
+      - name: 🚛 Logistics & Fleet Management ERP
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://zhdlyijncgougbvfrvbw.supabase.co/rest/v1/" \
+            -H "apikey: sb_publishable_U73-1hgSgHoIptxbTpSl0w_IYu3R9Sp" \
+            -H "Authorization: Bearer sb_publishable_U73-1hgSgHoIptxbTpSl0w_IYu3R9Sp")
+          echo "Logistics & Fleet Management ERP → HTTP $STATUS"
+
+      - name: 🤝 Cooperative & Microfinance ERP
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://prebnsxvoguemogwtzpe.supabase.co/rest/v1/" \
+            -H "apikey: sb_publishable_2_TcZYb29IMgStaS9Xd3JA_IndCyjEn" \
+            -H "Authorization: Bearer sb_publishable_2_TcZYb29IMgStaS9Xd3JA_IndCyjEn")
+          echo "Cooperative & Microfinance ERP → HTTP $STATUS"
+
+      - name: 🛒 Retail & Supermarket ERP
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://orextunjqfezupxvwbmc.supabase.co/rest/v1/" \
+            -H "apikey: sb_publishable_cCicbaDtnGvB6A_Nji9X9A_HNGMHPFd" \
+            -H "Authorization: Bearer sb_publishable_cCicbaDtnGvB6A_Nji9X9A_HNGMHPFd")
+          echo "Retail & Supermarket ERP → HTTP $STATUS"
+
+      - name: 🏢 Real Estate & Property Management ERP
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://uhyucgjcwafpbdokhjte.supabase.co/rest/v1/" \
+            -H "apikey: sb_publishable_eKGtweU2KMp7uFl4s3p7oQ_Zn7-gwi4" \
+            -H "Authorization: Bearer sb_publishable_eKGtweU2KMp7uFl4s3p7oQ_Zn7-gwi4")
+          echo "Real Estate & Property Management ERP → HTTP $STATUS"
+
+      - name: 🍽️ Restaurant & Food Service ERP
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://wmqkbwcholvnbpnuqnzm.supabase.co/rest/v1/" \
+            -H "apikey: sb_publishable_Rsa06E6MYWBjRHJu5i51LQ_XcyvOm_N" \
+            -H "Authorization: Bearer sb_publishable_Rsa06E6MYWBjRHJu5i51LQ_XcyvOm_N")
+          echo "Restaurant & Food Service ERP → HTTP $STATUS"
+
+      - name: 💊 Pharmacy Management ERP
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://kcueevrfdkbvkgjpyzuo.supabase.co/rest/v1/" \
+            -H "apikey: sb_publishable_m7h5UBxY2qu6myFnXM34bA_50__huq_" \
+            -H "Authorization: Bearer sb_publishable_m7h5UBxY2qu6myFnXM34bA_50__huq_")
+          echo "Pharmacy Management ERP → HTTP $STATUS"
+
+      - name: 🎓 School Management ERP
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://epsygtwxjbqrxseerglh.supabase.co/rest/v1/" \
+            -H "apikey: sb_publishable_dgR5sCUzfjfLiuvEgxjL0w_VosRuBkO" \
+            -H "Authorization: Bearer sb_publishable_dgR5sCUzfjfLiuvEgxjL0w_VosRuBkO")
+          echo "School Management ERP → HTTP $STATUS"
+
+      # ── Future projects — uncomment, fill URL and key as you upload them ──
+
+      # - name: 🏭 Manufacturing ERP
+      #   run: |
+      #     STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+      #       "https://YOUR_URL.supabase.co/rest/v1/" \
+      #       -H "apikey: YOUR_ANON_KEY" \
+      #       -H "Authorization: Bearer YOUR_ANON_KEY")
+      #     echo "Manufacturing ERP → HTTP $STATUS"
+
+      # - name: 🌾 Agriculture, Agribusiness & Farm Management ERP
+      #   run: |
+      #     STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+      #       "https://YOUR_URL.supabase.co/rest/v1/" \
+      #       -H "apikey: YOUR_ANON_KEY" \
+      #       -H "Authorization: Bearer YOUR_ANON_KEY")
+      #     echo "Agriculture ERP → HTTP $STATUS"
+
+      # - name: ⛽ Oil, Gas & Energy ERP
+      #   run: |
+      #     STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+      #       "https://YOUR_URL.supabase.co/rest/v1/" \
+      #       -H "apikey: YOUR_ANON_KEY" \
+      #       -H "Authorization: Bearer YOUR_ANON_KEY")
+      #     echo "Oil, Gas & Energy ERP → HTTP $STATUS"
+
+      # - name: ⛏️ Mining & Mineral Resources ERP
+      #   run: |
+      #     STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+      #       "https://YOUR_URL.supabase.co/rest/v1/" \
+      #       -H "apikey: YOUR_ANON_KEY" \
+      #       -H "Authorization: Bearer YOUR_ANON_KEY")
+      #     echo "Mining & Mineral Resources ERP → HTTP $STATUS"
+
+      - name: ✅ All done
+        run: echo "All active NegoLinks Supabase projects have been pinged successfully."
