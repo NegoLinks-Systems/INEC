@@ -34,4 +34,4 @@ jobs:
           `;
           fs.writeFileSync(".env", envContent.trim());
           '
-          npm run seed
+          npx tsx scripts/seedFirebase.ts
