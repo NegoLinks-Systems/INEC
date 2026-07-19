@@ -1,5 +1,4 @@
 name: NegoLinks — Supabase Keep Alive
-
 on:
   schedule:
     # Runs every 5 days at 8:00 AM UTC (9:00 AM WAT — Nigeria time)
@@ -10,7 +9,6 @@ jobs:
   keep-alive:
     name: Ping All Active Supabase Projects
     runs-on: ubuntu-latest
-
     steps:
       - name: 🏥 Hospital Management ERP
         run: |
@@ -92,8 +90,24 @@ jobs:
             -H "Authorization: Bearer sb_publishable_dgR5sCUzfjfLiuvEgxjL0w_VosRuBkO")
           echo "School Management ERP → HTTP $STATUS"
 
-      # ── Future projects — uncomment, fill URL and key as you upload them ──
+      - name: ⛽ Oil, Gas & Energy ERP
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://qmqbyhoqpwycagyklvqv.supabase.co/rest/v1/" \
+            -H "apikey: sb_publishable_dfV_10aQRrs-nxOI6pmryA_vrhZUJrG" \
+            -H "Authorization: Bearer sb_publishable_dfV_10aQRrs-nxOI6pmryA_vrhZUJrG")
+          echo "Oil, Gas & Energy ERP → HTTP $STATUS"
 
+      - name: ⛏️ Mining & Mineral Resources ERP
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://mwjrtaooxlrcdllxnzmd.supabase.co/rest/v1/" \
+            -H "apikey: sb_publishable_q2NSSJvS4jKPbKUknQglhg__fsi9q6S" \
+            -H "Authorization: Bearer sb_publishable_q2NSSJvS4jKPbKUknQglhg__fsi9q6S")
+          echo "Mining & Mineral Resources ERP → HTTP $STATUS"
+
+      # ── Future projects — uncomment, fill URL and key as you upload them ──
+      
       # - name: 🏭 Manufacturing ERP
       #   run: |
       #     STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
@@ -101,7 +115,7 @@ jobs:
       #       -H "apikey: YOUR_ANON_KEY" \
       #       -H "Authorization: Bearer YOUR_ANON_KEY")
       #     echo "Manufacturing ERP → HTTP $STATUS"
-
+      
       # - name: 🌾 Agriculture, Agribusiness & Farm Management ERP
       #   run: |
       #     STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
@@ -109,22 +123,6 @@ jobs:
       #       -H "apikey: YOUR_ANON_KEY" \
       #       -H "Authorization: Bearer YOUR_ANON_KEY")
       #     echo "Agriculture ERP → HTTP $STATUS"
-
-      # - name: ⛽ Oil, Gas & Energy ERP
-      #   run: |
-      #     STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-      #       "https://YOUR_URL.supabase.co/rest/v1/" \
-      #       -H "apikey: YOUR_ANON_KEY" \
-      #       -H "Authorization: Bearer YOUR_ANON_KEY")
-      #     echo "Oil, Gas & Energy ERP → HTTP $STATUS"
-
-      # - name: ⛏️ Mining & Mineral Resources ERP
-      #   run: |
-      #     STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-      #       "https://YOUR_URL.supabase.co/rest/v1/" \
-      #       -H "apikey: YOUR_ANON_KEY" \
-      #       -H "Authorization: Bearer YOUR_ANON_KEY")
-      #     echo "Mining & Mineral Resources ERP → HTTP $STATUS"
 
       - name: ✅ All done
         run: echo "All active NegoLinks Supabase projects have been pinged successfully."
