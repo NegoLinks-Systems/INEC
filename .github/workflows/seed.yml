@@ -1,0 +1,36 @@
+name: Run Database Seed
+
+on:
+  workflow_dispatch: # Allows you to manually click a button to run this
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Create Env File & Run Seed
+        env:
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "inec-9a779.firebaseapp.com"
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: "inec-9a779"
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "inec-9a779.firebasestorage.app"
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "770158005919"
+          NEXT_PUBLIC_FIREBASE_APP_ID: "1:770158005919:web:94964e0942f4d7642a1caa"
+        run: |
+          echo "NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}" >> .env
+          echo "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=inec-9a779.firebaseapp.com" >> .env
+          echo "NEXT_PUBLIC_FIREBASE_PROJECT_ID=inec-9a779" >> .env
+          echo "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=inec-9a779.firebasestorage.app" >> .env
+          echo "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=770158005919" >> .env
+          echo "NEXT_PUBLIC_FIREBASE_APP_ID=1:770158005919:web:94964e0942f4d7642a1caa" >> .env
+          npm run seed
