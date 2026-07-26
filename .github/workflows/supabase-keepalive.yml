@@ -1,8 +1,8 @@
 name: NegoLinks — Supabase Keep Alive
 on:
   schedule:
-    # Runs every 5 days at 8:00 AM UTC (9:00 AM WAT — Nigeria time)
-    - cron: '0 8 */5 * *'
+    # Runs every day at 8:00 AM UTC (9:00 AM WAT — Nigeria time)
+    - cron: '0 8 * * *'
   workflow_dispatch: # Allows manual trigger from GitHub Actions UI
 
 jobs:
@@ -107,7 +107,7 @@ jobs:
           echo "Mining & Mineral Resources ERP → HTTP $STATUS"
 
       # ── Future projects — uncomment, fill URL and key as you upload them ──
-      
+
       # - name: 🏭 Manufacturing ERP
       #   run: |
       #     STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
@@ -115,7 +115,7 @@ jobs:
       #       -H "apikey: YOUR_ANON_KEY" \
       #       -H "Authorization: Bearer YOUR_ANON_KEY")
       #     echo "Manufacturing ERP → HTTP $STATUS"
-      
+
       # - name: 🌾 Agriculture, Agribusiness & Farm Management ERP
       #   run: |
       #     STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
